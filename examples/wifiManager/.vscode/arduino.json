@@ -1,0 +1,5 @@
+{
+    "board": "arduino:renesas_uno:unor4wifi",
+    "sketch": "wifiManager.ino",
+    "port": "COM14"
+}
