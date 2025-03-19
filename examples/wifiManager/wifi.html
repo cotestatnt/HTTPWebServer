@@ -350,22 +350,7 @@
             // Funzione per caricare lo stato della connessione
             async fetchConnectionStatus() {
                 try {
-                    // In un'implementazione reale, questa sarebbe una richiesta API
-                    // Simuliamo una risposta per il test
-                    const response = await makeApiCall('/wifi/info', {
-                        connected: Math.random() > 0.3, // Simuliamo connection status
-                        info: {
-                            ssid: 'MiaReteWiFi',
-                            bssid: '00:11:22:33:44:55',
-                            rssi: -65,
-                            ip: '192.168.1.100',
-                            subnet: '255.255.255.0',
-                            gateway: '192.168.1.1',
-                            dns: '8.8.8.8',
-                            mac: 'AA:BB:CC:DD:EE:FF'
-                        }
-                    });
-
+                    const response = await makeApiCall('/wifi/info');
                     this.connected = response.connected;
                     if (response.connected) {
                         this.connectionInfo = response.info;
@@ -384,18 +369,7 @@
                 view.updateScanUI();
 
                 try {
-                    // In un'implementazione reale, questa sarebbe una richiesta API
-                    // Simuliamo una risposta per il test
-                    const response = await makeApiCall('/wifi/scan', {
-                        networks: [
-                            { ssid: 'WiFi-Home', rssi: -45, encryption: 'WPA2', channel: 1 },
-                            { ssid: 'Vodafone-WiFi', rssi: -60, encryption: 'WPA2/PSK', channel: 6 },
-                            { ssid: 'OpenNetwork', rssi: -70, encryption: 'Open', channel: 11 },
-                            { ssid: 'FreeWiFi', rssi: -75, encryption: 'WEP', channel: 3 },
-                            { ssid: 'IoT-Network', rssi: -80, encryption: 'WPA2/Enterprise', channel: 9 }
-                        ]
-                    }, 2000); // Aggiungiamo un ritardo per simulare la scansione
-
+                    const response = await makeApiCall('/wifi/scan');
                     this.networks = response.networks;
                     this.scanning = false;
                     return response.networks;
@@ -412,17 +386,12 @@
             // Funzione per salvare le impostazioni WiFi
             async saveWiFiSettings(formData) {
                 try {
-                    // In un'implementazione reale, questa sarebbe una richiesta API POST
-                    const response = await makeApiCall('/api/save', {
-                        success: Math.random() > 0.2, // Simuliamo successo/fallimento
-                        message: 'Connessione stabilita con successo'
-                    }, 3000);
-
-                    if (response.success) {
+                    const response = await makeApiCall('/wifi/save', 'POST', formData, 'application/x-www-form-urlencoded');
+                    if (response.result === "ok") {
                         this.connected = true;
                         this.connectionInfo.ssid = formData.ssid;
                         showMessage('Connessione stabilita con successo', 'success');
-                        await this.fetchConnectionStatus(); // Aggiorna lo stato dopo la connessione
+                        await this.fetchConnectionStatus();
                         return true;
                     } else {
                         showMessage('Impossibile connettersi alla rete. Verifica SSID e password.', 'error');
@@ -431,27 +400,6 @@
                 } catch (error) {
                     showMessage('Si è verificato un errore durante il salvataggio delle impostazioni', 'error');
                     console.error('Error saving WiFi settings:', error);
-                    return false;
-                }
-            },
-
-            // Funzione per reset WiFi
-            async resetWiFi() {
-                try {
-                    const response = await makeApiCall('/api/reset', {
-                        success: true
-                    });
-
-                    if (response.success) {
-                        showMessage('Reset WiFi completato. Il dispositivo si riavvierà.', 'success');
-                        return true;
-                    } else {
-                        showMessage('Errore durante il reset', 'error');
-                        return false;
-                    }
-                } catch (error) {
-                    showMessage('Si è verificato un errore durante il reset', 'error');
-                    console.error('Error resetting WiFi:', error);
                     return false;
                 }
             }
@@ -500,13 +448,6 @@
                 document.getElementById('btn-back-home2').addEventListener('click', (e) => {
                     e.preventDefault();
                     this.showTab('home');
-                });
-
-                document.getElementById('btn-reset').addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    if (confirm('Sei sicuro di voler resettare la configurazione WiFi?')) {
-                        await controller.resetWiFi();
-                    }
                 });
 
                 // Form submit
@@ -612,13 +553,11 @@
                         <table>
                             <tr><td>Stato:</td><td>Connesso</td></tr>
                             <tr><td>SSID:</td><td>${wifiManager.connectionInfo.ssid}</td></tr>
-                            <tr><td>BSSID:</td><td>${wifiManager.connectionInfo.bssid}</td></tr>
                             <tr><td>RSSI:</td><td>${wifiManager.connectionInfo.rssi} dBm</td></tr>
                             <tr><td>IP:</td><td>${wifiManager.connectionInfo.ip}</td></tr>
                             <tr><td>Subnet Mask:</td><td>${wifiManager.connectionInfo.subnet}</td></tr>
                             <tr><td>Gateway:</td><td>${wifiManager.connectionInfo.gateway}</td></tr>
                             <tr><td>DNS:</td><td>${wifiManager.connectionInfo.dns}</td></tr>
-                            <tr><td>MAC:</td><td>${wifiManager.connectionInfo.mac}</td></tr>
                         </table>
                     `;
                 } else {
@@ -656,68 +595,52 @@
                 await wifiManager.scanNetworks();
             },
 
-            // Seleziona una rete dalla lista
-            selectNetwork(ssid) {
-                document.getElementById('ssid').value = ssid;
-                view.showTab('home');
-            },
-
             // Salva le impostazioni WiFi
             async saveWiFiSettings() {
                 const form = document.getElementById('wifi-form');
-                const formData = {
-                    ssid: form.querySelector('#ssid').value,
-                    password: form.querySelector('#password').value,
-                    useStatic: form.querySelector('#use-static').checked,
-                    ip: form.querySelector('#ip').value,
-                    gateway: form.querySelector('#gateway').value,
-                    subnet: form.querySelector('#subnet').value,
-                    dns1: form.querySelector('#dns1').value,
-                    dns2: form.querySelector('#dns2').value
-                };
+                const formData = new URLSearchParams();
+                formData.append('ssid', form.querySelector('#ssid').value.trim());
+                formData.append('password', form.querySelector('#password').value.trim());
+                formData.append('useStatic', form.querySelector('#use-static').checked ? '1' : '0');
+                formData.append('ip', form.querySelector('#ip').value.trim());
+                formData.append('gateway', form.querySelector('#gateway').value.trim());
+                formData.append('subnet', form.querySelector('#subnet').value.trim());
+                formData.append('dns1', form.querySelector('#dns1').value.trim());
+                formData.append('dns2', form.querySelector('#dns2').value.trim());
 
-                // Validazione base
-                if (!formData.ssid) {
+                // Validazione ssid
+                if (!formData.get('ssid')) {
                     showMessage('SSID non può essere vuoto', 'error');
                     return;
                 }
 
-                if (formData.useStatic) {
+                if (formData.get('useStatic') === '1') {
                     // Validazione campi IP
-                    if (!isValidIPv4(formData.ip) || !isValidIPv4(formData.gateway) || !isValidIPv4(formData.subnet)) {
+                    if (!isValidIPv4(formData.get('ip')) || !isValidIPv4(formData.get('gateway')) || !isValidIPv4(formData.get('subnet'))) {
                         showMessage('Indirizzo IP, Gateway o Subnet non validi', 'error');
                         return;
                     }
-
                     // DNS sono opzionali, ma se forniti devono essere validi
-                    if (formData.dns1 && !isValidIPv4(formData.dns1)) {
+                    if (formData.get('dns1') && !isValidIPv4(formData.get('dns1'))) {
                         showMessage('DNS1 non valido', 'error');
                         return;
                     }
-
-                    if (formData.dns2 && !isValidIPv4(formData.dns2)) {
+                    if (formData.get('dns2') && !isValidIPv4(formData.get('dns2'))) {
                         showMessage('DNS2 non valido', 'error');
                         return;
                     }
                 }
 
-                const success = await wifiManager.saveWiFiSettings(formData);
-                if (success) {
-                    view.updateConnectionStatus();
-                    setTimeout(() => {
-                        view.showTab('info');
-                        view.updateInfoTab();
-                    }, 1000);
-                }
+                await wifiManager.saveWiFiSettings(formData.toString());
             },
 
-            // Reset WiFi
-            async resetWiFi() {
-                await wifiManager.resetWiFi();
+            // Seleziona una rete dalla lista
+            selectNetwork(ssid) {
+                document.getElementById('ssid').value = ssid;
+                view.showTab('home');
             }
+            
         };
-
-        // Funzioni di utilità
 
         // Mostra un messaggio all'utente
         function showMessage(message, type = 'success') {
@@ -744,21 +667,26 @@
         }
 
         // Fetch endpoint implementation
-        async function makeApiCall(endpoint, method = 'GET', data = null) {
-            const baseUrl = 'http://192.168.24.91';
+        async function makeApiCall(endpoint, method = 'GET', data = null, type = 'application/json') {
             const options = {
                 method: method,
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': type
+                },
+                mode: 'cors',
+                credentials: 'same-origin' 
             };
 
             if (data && (method === 'POST' || method === 'PUT')) {
-                options.body = JSON.stringify(data);
+                if (type === 'application/json') {
+                    options.body = JSON.stringify(data);
+                } else if (type === 'application/x-www-form-urlencoded') {
+                    options.body = data;
+                }
             }
 
             try {
-                const response = await fetch(`${baseUrl}${endpoint}`, options);
+                const response = await fetch(`${endpoint}`, options);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
