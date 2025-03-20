@@ -1,4 +1,4 @@
-#include "WifiManager.h"
+#include "WiFiManager.h"
 
 // Costruttore
 WiFiManager::WiFiManager(WebServer* server)
