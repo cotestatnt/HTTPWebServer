@@ -32,9 +32,7 @@
 #include "websocket/WebSocketsServer.h"
 #include "WifiManager.h"
 
-
 class WiFiManager;
-
 
 #if defined(ARDUINO_UNOR4_WIFI)
   #include "WiFi.h"

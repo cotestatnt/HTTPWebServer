@@ -85,8 +85,6 @@ void WebServer::begin() {
 #if defined(ESP32)
   _server.setNoDelay(true);
 #endif
-
-
 }
 
 
@@ -1044,6 +1042,7 @@ WebServer &WebServer::removeMiddleware(Middleware *middleware) {
 void WebServer::enableWifiManager(){
   _wifiManager = new WiFiManager(this);
 }
+
 void WebServer::disableWifiManager() {
   delete _wifiManager;
 }

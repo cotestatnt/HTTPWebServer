@@ -23,6 +23,7 @@ class WiFiManager {
 
 public:
   WiFiManager(WebServer* server);
+  virtual ~WiFiManager() {} 
 
   void begin();
   void handleClient();
