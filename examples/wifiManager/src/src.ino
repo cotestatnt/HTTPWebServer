@@ -2,7 +2,7 @@
 #include <WebServer.h>
 #include <Preferences.h>
 
-#include "wifiManager.h"
+// #include "wifiManager.h"
 
 const char* ssidAP = "ARDUINO_UNOR4_AP";
 bool runCaptivePortal = false;
@@ -14,8 +14,6 @@ typedef struct {
 
 Preferences prefs;
 WebServer server(80);
-// Crea un'istanza di WiFiManager passando il server
-WiFiManager wifiManager(server);
 
 size_t saveWifiConfig(const char* ssid, const char* pass) {
   wifiConfig_t wifiConfig;
@@ -85,18 +83,16 @@ void setup() {
     printWiFiInfo();
   }
 
-  // Configura un callback quando la connessione WiFi è stabilita
-  wifiManager.onConnected([](const char* ssid, const char* pass) {
+
+  server.enableWifiManager();
+  server.onWiFiConnected([](const char* ssid, const char* pass) {
     printWiFiInfo();
     if (saveWifiConfig(ssid, pass)) {
       Serial.print("WiFi credentials saved to preferences for SSID: ");
       Serial.println(ssid);
     }
   });
-
-  // Avvia il WiFiManager
-  wifiManager.begin();
-
+  
   // Reindirizza a /wifi
   server.on("/", []() {
     server.sendHeader("Location", "/wifi");
