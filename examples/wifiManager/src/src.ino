@@ -85,7 +85,7 @@ void setup() {
 
 
   server.enableWifiManager();
-  server.onWiFiConnected([](const char* ssid, const char* pass) {
+  server.onWifiConnected([](const char* ssid, const char* pass) {
     printWiFiInfo();
     if (saveWifiConfig(ssid, pass)) {
       Serial.print("WiFi credentials saved to preferences for SSID: ");

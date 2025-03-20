@@ -5,8 +5,10 @@
 #include <vector>
 
 #include "WebServer.h"
-#include "webpages.h"
+#include "wifi_min_html.h"
 
+
+class WebServer;
 
 struct NetworkInfo {
   String ssid;
@@ -17,8 +19,10 @@ struct NetworkInfo {
 };
 
 class WiFiManager {
+  friend class WebServer;
+
 public:
-  WiFiManager(WebServer& server);
+  WiFiManager(WebServer* server);
 
   void begin();
   void handleClient();
@@ -54,7 +58,7 @@ public:
   }
 
 private:
-  WebServer& _server;
+  WebServer* _server;
 
   String _defaultSSID;
   String _defaultPassword;

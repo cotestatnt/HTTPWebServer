@@ -30,6 +30,10 @@
 #include "utils/Logging.h"
 
 #include "websocket/WebSocketsServer.h"
+#include "WifiManager.h"
+
+
+class WiFiManager;
 
 
 #if defined(ARDUINO_UNOR4_WIFI)
@@ -184,6 +188,11 @@ public:
   WebServer &addMiddleware(Middleware::Function fn);
   WebServer &removeMiddleware(Middleware *middleware);
 
+  void enableWifiManager();
+  void disableWifiManager();
+  void onWifiConnected(std::function<void(const char*, const char*)> callback);
+  void onWifiConfig(std::function<void(void)> callback);
+
   String uri() const {
     return _currentUri;
   }
@@ -242,9 +251,6 @@ public:
   void enableCORS(boolean value = true);
   void enableCrossOrigin(boolean value = true);
 
-  // typedef std::function<String(FS &fs, const String &fName)> ETagFunction;
-  // void enableETag(bool enable, ETagFunction fn = nullptr);
-
   void setContentLength(const size_t contentLength);
   void sendHeader(const String &name, const String &value, bool first = false);
   void sendContent(const String &content);
@@ -258,10 +264,6 @@ public:
     _streamFileCore(file.size(), file.name(), contentType, code);
     return _currentClient.write(file);
   }
-
-  // bool _eTagEnabled = false;
-  // ETagFunction _eTagFunction = nullptr;
-
   static String responseCodeToString(int code);
 
 protected:
@@ -273,20 +275,6 @@ protected:
   virtual size_t _currentClientWrite_P(PGM_P b, size_t l) {
     return _currentClient.write(b, l);
   }
-
-  // virtual size_t _currentClientWrite_P(PGM_P b, size_t l) {
-  //   size_t written = 0;
-  //   for (size_t i = 0; i < l; i++) {
-  //     char c = pgm_read_byte(b + i);  // Legge un byte dalla Flash
-  //     if (_currentClient.write(c) == 1) {
-  //       written++;
-  //     } else {
-  //       break;
-  //     }
-  //   }
-  //   return written;
-  // }
-
 
   void _addRequestHandler(RequestHandler *handler);
   bool _removeRequestHandler(RequestHandler *handler);
@@ -358,6 +346,8 @@ protected:
   int _responseCode = 0;
   bool _collectAllHeaders = false;
   MiddlewareChain *_chain = nullptr;
+
+  WiFiManager* _wifiManager = nullptr;
 };
 
 #endif  //ESP8266WEBSERVER_H

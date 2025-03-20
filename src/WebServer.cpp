@@ -75,6 +75,7 @@ WebServer::~WebServer() {
     handler = next;
   }
   _firstHandler = nullptr;
+  delete _wifiManager;
 }
 
 void WebServer::begin() {
@@ -84,6 +85,8 @@ void WebServer::begin() {
 #if defined(ESP32)
   _server.setNoDelay(true);
 #endif
+
+
 }
 
 
@@ -1034,4 +1037,21 @@ WebServer &WebServer::removeMiddleware(Middleware *middleware) {
     _chain->removeMiddleware(middleware);
   }
   return *this;
+}
+
+
+// WiFi Manager handlers
+void WebServer::enableWifiManager(){
+  _wifiManager = new WiFiManager(this);
+}
+void WebServer::disableWifiManager() {
+  delete _wifiManager;
+}
+
+void WebServer::onWifiConnected(std::function<void(const char*, const char*)> callback) {
+  _wifiManager->onConnected(callback);
+}
+
+void WebServer::onWifiConfig(std::function<void(void)> callback) {
+  _wifiManager->onConfigChanged(callback);
 }
