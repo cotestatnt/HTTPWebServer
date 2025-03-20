@@ -27,7 +27,7 @@
 
 #include "WebServer.h"
 #include "utils/mimetable.h"
-#include "utils/logging.h"
+#include "logging.h"
 
 #ifndef WEBSERVER_MAX_POST_ARGS
 #define WEBSERVER_MAX_POST_ARGS 32
