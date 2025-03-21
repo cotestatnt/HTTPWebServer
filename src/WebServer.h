@@ -30,7 +30,7 @@
 #include "Logging.h"
 
 #include "websocket/WebSocketsServer.h"
-#include "WifiManager.h"
+#include "WiFiManager.h"
 
 class WiFiManager;
 
