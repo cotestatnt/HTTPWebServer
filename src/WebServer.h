@@ -30,9 +30,7 @@
 #include "Logging.h"
 
 #include "websocket/WebSocketsServer.h"
-#include "WiFiManager.h"
-
-class WiFiManager;
+#include "wifimanager/WiFiManager.h"
 
 #if defined(ARDUINO_UNOR4_WIFI)
   #include "WiFi.h"
@@ -186,10 +184,6 @@ public:
   WebServer &addMiddleware(Middleware::Function fn);
   WebServer &removeMiddleware(Middleware *middleware);
 
-  void enableWifiManager();
-  void disableWifiManager();
-  void onWifiConnected(std::function<void(const char*, const char*)> callback);
-  void onWifiConfig(std::function<void(void)> callback);
 
   String uri() const {
     return _currentUri;
@@ -344,8 +338,6 @@ protected:
   int _responseCode = 0;
   bool _collectAllHeaders = false;
   MiddlewareChain *_chain = nullptr;
-
-  WiFiManager* _wifiManager = nullptr;
 };
 
 #endif  //ESP8266WEBSERVER_H

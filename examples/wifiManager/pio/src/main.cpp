@@ -15,6 +15,7 @@ typedef struct {
 
 Preferences prefs;
 WebServer server(80);
+WiFiManager wifiManager(server);
 
 size_t saveWifiConfig(const char* ssid, const char* pass) {
   wifiConfig_t wifiConfig;
@@ -84,15 +85,17 @@ void setup() {
     printWiFiInfo();
   }
 
-
-  server.enableWifiManager();
-  server.onWifiConnected([](const char* ssid, const char* pass) {
+  // Configure WiFiManager callback in order to save wifi credentials usings preferences
+  wifiManager.onConnected([](const char* ssid, const char* pass) {
     printWiFiInfo();
     if (saveWifiConfig(ssid, pass)) {
       Serial.print("WiFi credentials saved to preferences for SSID: ");
       Serial.println(ssid);
     }
   });
+
+  // Start the WiFiManager
+  wifiManager.begin();
   
   // Reindirizza a /wifi
   server.on("/", []() {
@@ -100,7 +103,7 @@ void setup() {
     server.send(302, "text/plain", "");
   });
 
-
+ 
   server.begin();
   Serial.println("HTTP server started");
 }

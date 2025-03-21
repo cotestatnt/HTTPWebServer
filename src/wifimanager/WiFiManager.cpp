@@ -1,25 +1,25 @@
 #include "WiFiManager.h"
 
 // Costruttore
-WiFiManager::WiFiManager(WebServer* server)
+WiFiManager::WiFiManager(WebServer& server)
   : _server(server) {
 }
 
 void WiFiManager::begin() {
   // Configura le route per la gestione WiFi
-  _server->on("/wifi", HTTP_GET, [this]() {
+  _server.on("/wifi", HTTP_GET, [this]() {
     this->handleRoot();
   });
-  _server->on("/wifi/scan", HTTP_GET, [this]() {
+  _server.on("/wifi/scan", HTTP_GET, [this]() {
     this->handleScan();
   });
-  _server->on("/wifi/save", HTTP_POST, [this]() {
+  _server.on("/wifi/save", HTTP_POST, [this]() {
     this->handleSave();
   });
-  _server->on("/wifi/info", HTTP_GET, [this]() {
+  _server.on("/wifi/info", HTTP_GET, [this]() {
     this->handleInfo();
   });
-  _server->enableCORS(true);
+  _server.enableCORS(true);
 
   // Se sono state fornite credenziali di default, prova a connettersi
   if (_defaultSSID.length() > 0) {
@@ -52,8 +52,8 @@ void WiFiManager::setStaticIP(IPAddress ip, IPAddress gateway, IPAddress subnet,
 // Handlers per le pagine web
 void WiFiManager::handleRoot() {
 
-  _server->sendHeader(F("Content-Encoding"), F("gzip"));
-  _server->send(200, "text/html", (const char*)wifi_min_html, sizeof(wifi_min_html));
+  _server.sendHeader(F("Content-Encoding"), F("gzip"));
+  _server.send(200, "text/html", (const char*)wifi_min_html, sizeof(wifi_min_html));
 }
 
 void WiFiManager::handleScan() {
@@ -69,7 +69,7 @@ void WiFiManager::handleScan() {
     jsonResponse += "}";
   }
   jsonResponse += "]}";
-  _server->send(200, "application/json", jsonResponse);
+  _server.send(200, "application/json", jsonResponse);
 }
 
 
@@ -88,23 +88,23 @@ void WiFiManager::handleInfo() {
     jsonResponse += "}";
   }
   jsonResponse += "}";
-  _server->send(200, "application/json", jsonResponse);
+  _server.send(200, "application/json", jsonResponse);
 }
 
 void WiFiManager::handleSave() {
-  String ssid = _server->arg("ssid");
-  String password = _server->arg("password");
-  String ip = _server->arg("ip");
-  String gateway = _server->arg("gateway");
-  String subnet = _server->arg("subnet");
-  String dns1 = _server->arg("dns1");
-  String dns2 = _server->arg("dns2");
+  String ssid = _server.arg("ssid");
+  String password = _server.arg("password");
+  String ip = _server.arg("ip");
+  String gateway = _server.arg("gateway");
+  String subnet = _server.arg("subnet");
+  String dns1 = _server.arg("dns1");
+  String dns2 = _server.arg("dns2");
 
-  bool useStatic = _server->arg("useStatic").toInt();
+  bool useStatic = _server.arg("useStatic").toInt();
 
   // Valida i parametri
   if (ssid.length() == 0) {
-    _server->send(400, "text/html", "SSID non può essere vuoto");
+    _server.send(400, "text/html", "SSID non può essere vuoto");
     return;
   }
 
@@ -115,18 +115,18 @@ void WiFiManager::handleSave() {
     IPAddress staticIP, staticGateway, staticSubnet, staticDNS1, staticDNS2;
 
     if (!staticIP.fromString(ip) || !staticGateway.fromString(gateway) || !staticSubnet.fromString(subnet)) {
-      _server->send(400, "text/html", "Parametri IP non validi");
+      _server.send(400, "text/html", "Parametri IP non validi");
       return;
     }
 
     // DNS sono opzionali
     if (dns1.length() > 0 && !staticDNS1.fromString(dns1)) {
-      _server->send(400, "text/html", "DNS1 non valido");
+      _server.send(400, "text/html", "DNS1 non valido");
       return;
     }
 
     if (dns2.length() > 0 && !staticDNS2.fromString(dns2)) {
-      _server->send(400, "text/html", "DNS2 non valido");
+      _server.send(400, "text/html", "DNS2 non valido");
       return;
     }
 
@@ -157,9 +157,9 @@ void WiFiManager::handleSave() {
     }
 
     // Connesso, carica la pagina info
-    _server->send(200, "text/plain", "{\"result\": \"ok\"}");
+    _server.send(200, "text/plain", "{\"result\": \"ok\"}");
   } else {
-    _server->send(400, "text/html", "Impossibile connettersi alla rete WiFi");
+    _server.send(400, "text/html", "Impossibile connettersi alla rete WiFi");
   }
 }
 

@@ -7,7 +7,6 @@
 #include "WebServer.h"
 #include "wifi_min_html.h"
 
-
 class WebServer;
 
 struct NetworkInfo {
@@ -22,7 +21,7 @@ class WiFiManager {
   friend class WebServer;
 
 public:
-  WiFiManager(WebServer* server);
+  WiFiManager(WebServer& server);
   virtual ~WiFiManager() {} 
 
   void begin();
@@ -59,7 +58,7 @@ public:
   }
 
 private:
-  WebServer* _server;
+  WebServer& _server;
 
   String _defaultSSID;
   String _defaultPassword;
