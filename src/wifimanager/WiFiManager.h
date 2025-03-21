@@ -128,6 +128,7 @@ private:
   String _defaultPassword;
 
   bool _useStaticIP = false;
+  bool _connected = false;
   IPAddress _staticIP;
   IPAddress _staticGateway;
   IPAddress _staticSubnet;

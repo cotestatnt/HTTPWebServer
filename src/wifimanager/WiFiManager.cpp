@@ -29,6 +29,9 @@ void WiFiManager::begin() {
       connectWithDHCP(_defaultSSID, _defaultPassword);
     }
   }
+
+  _connected = (WiFi.status() == WL_CONNECTED);
+
 }
 void WiFiManager::handleClient() {
   // The WebServer already handles clients, so nothing needs to be done here
@@ -72,22 +75,22 @@ void WiFiManager::handleScan() {
 
 
 void WiFiManager::handleInfo() {
+  String ssid = WiFi.SSID();
+  if (!ssid.length())
+    ssid = _defaultSSID;
   String jsonResponse = "{";
-  jsonResponse += "\"connected\":" + String(WiFi.status() == WL_CONNECTED);
-
-  if (WiFi.status() == WL_CONNECTED) {
-    jsonResponse += ",\"info\":{";
-    jsonResponse += "\"ssid\":\"" + String(WiFi.SSID()) + "\",";
-    jsonResponse += "\"rssi\":" + String(WiFi.RSSI()) + ",";
-    jsonResponse += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
-    jsonResponse += "\"subnet\":\"" + WiFi.subnetMask().toString() + "\",";
-    jsonResponse += "\"gateway\":\"" + WiFi.gatewayIP().toString() + "\",";
-    jsonResponse += "\"dns\":\"" + WiFi.dnsIP().toString() + "\"";
-    jsonResponse += "}";
-  }
-  jsonResponse += "}";
+  jsonResponse += "\"connected\":" + String(_connected);
+  jsonResponse += ",\"info\":{";
+  jsonResponse += "\"ssid\":\"" + ssid + "\",";
+  jsonResponse += "\"rssi\":" + String(WiFi.RSSI()) + ",";
+  jsonResponse += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
+  jsonResponse += "\"subnet\":\"" + WiFi.subnetMask().toString() + "\",";
+  jsonResponse += "\"gateway\":\"" + WiFi.gatewayIP().toString() + "\",";
+  jsonResponse += "\"dns\":\"" + WiFi.dnsIP().toString() + "\"";
+  jsonResponse += "}}";
   _server.send(200, "application/json", jsonResponse);
 }
+
 void WiFiManager::handleSave() {
   String ssid = _server.arg("ssid");
   String password = _server.arg("password");
@@ -104,8 +107,6 @@ void WiFiManager::handleSave() {
     _server.send(400, "text/html", "SSID cannot be empty");
     return;
   }
-
-  bool success = false;
 
   if (useStatic) {
     // Verify that IP parameters are valid
@@ -136,14 +137,14 @@ void WiFiManager::handleSave() {
     if (dns1.length() > 0) _staticDNS1 = staticDNS1;
     if (dns2.length() > 0) _staticDNS2 = staticDNS2;
 
-    success = connectWithStaticIP(ssid, password);
+    _connected = connectWithStaticIP(ssid, password);
   } else {
     // Use DHCP
     _useStaticIP = false;
-    success = connectWithDHCP(ssid, password);
+    _connected = connectWithDHCP(ssid, password);
   }
 
-  if (success) {
+  if (_connected) {
     // Save credentials as default for reboot
     _defaultSSID = ssid;
     _defaultPassword = password;
@@ -154,8 +155,10 @@ void WiFiManager::handleSave() {
     }
 
     // Connected, load the info page
-    _server.send(200, "text/plain", "{\"result\": \"ok\"}");
-  } else {
+    // _server.send(200, "text/plain", "{\"result\": \"ok\"}");
+    handleInfo();
+  } 
+  else {
     _server.send(400, "text/html", "Unable to connect to the WiFi network");
   }
 }
