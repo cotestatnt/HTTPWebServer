@@ -17,30 +17,20 @@
 /////////////////////////////////////////////////////////////////////////////////
 // Template to check if a class has the begin method with the specified signature
 template <typename, typename = void>
-struct has_begin : std::false_type
-{
-};
+struct has_begin : std::false_type{};
 
 template <typename T>
-struct has_begin<T, std::void_t<decltype(std::declval<T>().begin(std::declval<const char *>(), std::declval<const char *>(), std::declval<uint8_t>()))>>
-    : std::true_type
-{
-};
+struct has_begin<T, std::void_t<decltype(std::declval<T>().begin(std::declval<const char *>(), std::declval<const char *>(), std::declval<uint8_t>()))>> : std::true_type{};
 
 template <typename T>
 constexpr bool has_begin_v = has_begin<T>::value;
 
 template <typename T>
-void callBeginIfExists(T &obj, const char *ssid, const char *passphrase, uint8_t mode = 1)
-{
+void callBeginIfExists(T &obj, const char *ssid, const char *passphrase, uint8_t mode = 1) {
   if constexpr (has_begin_v<T>)
-  {
     obj.begin(ssid, passphrase, mode);
-  }
   else
-  {
     obj.begin(ssid, passphrase);
-  }
 }
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +45,17 @@ struct NetworkInfo
   String encryptionTypeStr;
   bool isHidden;
 };
+
+typedef struct {
+  char ssid[32];
+  char pass[32];
+  IPAddress ip;
+  IPAddress gateway;
+  IPAddress subnet;
+  IPAddress dns1;
+  IPAddress dns2;
+
+} WifiConfig_t;
 
 /**
  * @class WiFiManager
@@ -109,7 +110,7 @@ public:
    * @brief Registers a callback to be called when the WiFi connection is established.
    * @param callback A function that takes the SSID and password as parameters.
    */
-  inline void onConnected(const std::function<void(const char *, const char *)> &callback)
+  inline void onConnected(const std::function<void(WifiConfig_t& config)> &callback)
   {
     _connectedCallback = callback;
   }
@@ -117,26 +118,29 @@ public:
    * @brief Registers a callback to be called when the WiFi configuration changes.
    * @param callback A function with no parameters.
    */
-  inline void onConfigChanged(const std::function<void(void)> &callback)
+  inline void onConfigChanged(const std::function<void(WifiConfig_t& config)> &callback)
   {
     _configChangedCallback = callback;
   }
+  
 
 private:
   WebServer &_server;
-  String _defaultSSID;
-  String _defaultPassword;
+  // String _defaultSSID;
+  // String _defaultPassword;
+
+  WifiConfig_t _config;
 
   bool _useStaticIP = false;
   bool _connected = false;
-  IPAddress _staticIP;
-  IPAddress _staticGateway;
-  IPAddress _staticSubnet;
-  IPAddress _staticDNS1;
-  IPAddress _staticDNS2;
+  // IPAddress _staticIP;
+  // IPAddress _staticGateway;
+  // IPAddress _staticSubnet;
+  // IPAddress _staticDNS1;
+  // IPAddress _staticDNS2;
 
-  std::function<void(const char *, const char *)> _connectedCallback = nullptr;
-  std::function<void(void)> _configChangedCallback = nullptr;
+  std::function<void(WifiConfig_t& config)> _connectedCallback = nullptr;
+  std::function<void(WifiConfig_t& config)> _configChangedCallback = nullptr;
   std::vector<NetworkInfo> _networks;
 
   void handleRoot();

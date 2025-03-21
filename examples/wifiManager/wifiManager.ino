@@ -3,31 +3,16 @@
 #include <WebServer.h>
 #include <Preferences.h>
 
-// #include "wifiManager.h"
-
 const char* ssidAP = "ARDUINO_UNOR4_AP";
-bool runCaptivePortal = false;
-
-typedef struct {
-  char ssid[32];
-  char pass[64];
-} wifiConfig_t;
 
 Preferences prefs;
 WebServer server(80);
 WiFiManager wifiManager(server);
 
-size_t saveWifiConfig(const char* ssid, const char* pass) {
-  wifiConfig_t wifiConfig;
-  strcpy(wifiConfig.ssid, ssid);
-  strcpy(wifiConfig.pass, pass);
-  return prefs.putBytes("wifi", &wifiConfig, sizeof(wifiConfig));
-}
-
-wifiConfig_t getWiFiConfig() {
-  wifiConfig_t wifiConfig;
-  prefs.getBytes("wifi", &wifiConfig, sizeof(wifiConfig));
-  return wifiConfig;
+WifiConfig_t getWiFiConfig() {
+  WifiConfig_t config;
+  prefs.getBytes("wifi", &config, sizeof(config));
+  return config;
 }
 
 void printWiFiInfo() {
@@ -46,7 +31,7 @@ void setup() {
     while (1) {};
   }
 
-  wifiConfig_t config = getWiFiConfig();
+  WifiConfig_t config = getWiFiConfig();
 
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -86,12 +71,12 @@ void setup() {
   }
 
   // Configure WiFiManager callback in order to save wifi credentials usings preferences
-  wifiManager.onConnected([](const char* ssid, const char* pass) {
+  wifiManager.onConnected( [](WifiConfig_t& newConfig) {
+    prefs.putBytes("wifi", &newConfig, sizeof(newConfig));
+    Serial.print("WiFi credentials saved to preferences for SSID: ");
+    Serial.println(newConfig.ssid);
+
     printWiFiInfo();
-    if (saveWifiConfig(ssid, pass)) {
-      Serial.print("WiFi credentials saved to preferences for SSID: ");
-      Serial.println(ssid);
-    }
   });
 
   // Start the WiFiManager

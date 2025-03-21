@@ -22,11 +22,11 @@ void WiFiManager::begin() {
   _server.enableCORS(true);
 
   // If default credentials are provided, try to connect
-  if (_defaultSSID.length() > 0) {
+  if (strlen(_config.ssid)) {
     if (_useStaticIP) {
-      connectWithStaticIP(_defaultSSID, _defaultPassword);
+      connectWithStaticIP(_config.ssid, _config.pass);
     } else {
-      connectWithDHCP(_defaultSSID, _defaultPassword);
+      connectWithDHCP(_config.ssid, _config.pass);
     }
   }
 
@@ -38,17 +38,17 @@ void WiFiManager::handleClient() {
 }
 
 void WiFiManager::setDefaultCredentials(const String& ssid, const String& password) {
-  _defaultSSID = ssid;
-  _defaultPassword = password;
+  strcpy(_config.ssid, ssid.c_str());
+  strcpy(_config.pass, password.c_str());
 }
 
 void WiFiManager::setStaticIP(IPAddress ip, IPAddress gateway, IPAddress subnet, IPAddress dns1, IPAddress dns2) {
   _useStaticIP = true;
-  _staticIP = ip;
-  _staticGateway = gateway;
-  _staticSubnet = subnet;
-  _staticDNS1 = dns1;
-  _staticDNS2 = dns2;
+  _config.ip = ip;
+  _config.gateway = gateway;
+  _config.subnet = subnet;
+  _config.dns1 = dns1;
+  _config.dns2 = dns2;
 }
 
 // Handlers for web pages
@@ -77,7 +77,7 @@ void WiFiManager::handleScan() {
 void WiFiManager::handleInfo() {
   String ssid = WiFi.SSID();
   if (!ssid.length())
-    ssid = _defaultSSID;
+    ssid = _config.ssid;
   String jsonResponse = "{";
   jsonResponse += "\"connected\":" + String(_connected);
   jsonResponse += ",\"info\":{";
@@ -130,12 +130,12 @@ void WiFiManager::handleSave() {
 
     // Save static configuration
     _useStaticIP = true;
-    _staticIP = staticIP;
-    _staticGateway = staticGateway;
-    _staticSubnet = staticSubnet;
+    _config.ip = staticIP;
+    _config.gateway = staticGateway;
+    _config.subnet = staticSubnet;
 
-    if (dns1.length() > 0) _staticDNS1 = staticDNS1;
-    if (dns2.length() > 0) _staticDNS2 = staticDNS2;
+    if (dns1.length() > 0) _config.dns1 = staticDNS1;
+    if (dns2.length() > 0) _config.dns2 = staticDNS2;
 
     _connected = connectWithStaticIP(ssid, password);
   } else {
@@ -146,12 +146,12 @@ void WiFiManager::handleSave() {
 
   if (_connected) {
     // Save credentials as default for reboot
-    _defaultSSID = ssid;
-    _defaultPassword = password;
+    strcpy(_config.ssid, ssid.c_str());
+    strcpy(_config.pass, password.c_str());
 
     // Call the callback if it exists
     if (_configChangedCallback) {
-      _configChangedCallback();
+      _configChangedCallback(_config);
     }
 
     // Connected, load the info page
@@ -165,10 +165,11 @@ void WiFiManager::handleSave() {
 
 bool WiFiManager::connectWithStaticIP(const String& ssid, const String& password) {
   // Configure static IP
-  WiFi.config(_staticIP, _staticDNS1, _staticGateway, _staticSubnet);
-  WiFi.setDNS(_staticDNS1, _staticDNS2);
+  WiFi.config(_config.ip, _config.dns1, _config.gateway, _config.subnet);
+  WiFi.setDNS(_config.dns1, _config.dns2);
   return connectWithDHCP(ssid, password);
 }
+
 bool WiFiManager::connectWithDHCP(const String& ssid, const String& password) {
   // Wait up to 20 seconds for the connection
   int timeout = 10;
@@ -181,7 +182,7 @@ bool WiFiManager::connectWithDHCP(const String& ssid, const String& password) {
 
   if (WiFi.status() == WL_CONNECTED) {
     if (_connectedCallback) {
-      _connectedCallback(ssid.c_str(), password.c_str());
+      _connectedCallback(_config);
     }
     return true;
   }
