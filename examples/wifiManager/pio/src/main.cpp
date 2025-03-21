@@ -3,10 +3,7 @@
 #include <WebServer.h>
 #include <Preferences.h>
 
-// #include "wifiManager.h"
-
 const char* ssidAP = "ARDUINO_UNOR4_AP";
-bool runCaptivePortal = false;
 
 typedef struct {
   char ssid[32];
@@ -49,7 +46,7 @@ void setup() {
   // wifiConfig_t config = getWiFiConfig();
 
   wifiConfig_t config ;
-  
+
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
     Serial.println("Communication with WiFi module failed!");
