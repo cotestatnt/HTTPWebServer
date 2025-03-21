@@ -33,7 +33,7 @@
 
 class WebSocketsServerCore : protected WebSockets {
   public:
-    WebSocketsServerCore(const String & origin = "", const String & protocol = "arduino");
+    explicit WebSocketsServerCore(const String & origin = "", const String & protocol = "arduino");
     virtual ~WebSocketsServerCore(void);
 
     void begin(void);
@@ -118,10 +118,9 @@ class WebSocketsServerCore : protected WebSockets {
     uint32_t _pongTimeout;
     uint8_t _disconnectTimeoutCount;
 
-    void messageReceived(WSclient_t * client, WSopcode_t opcode, uint8_t * payload, size_t length, bool fin);
-
-    void clientDisconnect(WSclient_t * client);
-    bool clientIsConnected(WSclient_t * client);
+    void messageReceived(WSclient_t * client, WSopcode_t opcode, uint8_t * payload, size_t length, bool fin) override;
+    void clientDisconnect(WSclient_t * client) override;
+    bool clientIsConnected(WSclient_t * client) override;
 
 #if(WEBSOCKETS_NETWORK_TYPE != NETWORK_ESP8266_ASYNC)
     void handleClientData(void);
@@ -218,7 +217,7 @@ class WebSocketsServerCore : protected WebSockets {
 
 class WebSocketsServer : public WebSocketsServerCore {
   public:
-    WebSocketsServer(uint16_t port, const String & origin = "", const String & protocol = "arduino");
+    explicit WebSocketsServer(uint16_t port, const String & origin = "", const String & protocol = "arduino");
     virtual ~WebSocketsServer(void);
 
     void begin(void);

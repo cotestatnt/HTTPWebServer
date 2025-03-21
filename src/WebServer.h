@@ -117,10 +117,10 @@ typedef struct {
 class WebServer {
 public:
 #if defined(ESP32)
-  WebServer(IPAddress addr, int port = 80);
-  WebServer(int port = 80);
+  explicit WebServer(IPAddress addr, int port = 80);
+  explicit WebServer(int port = 80);
 #else
-  WebServer(int port = 80);
+  explicit WebServer(int port = 80);
 #endif
 
   virtual ~WebServer();

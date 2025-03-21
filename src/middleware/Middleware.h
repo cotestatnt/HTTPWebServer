@@ -27,7 +27,7 @@ private:
 
 class MiddlewareFunction : public Middleware {
 public:
-  MiddlewareFunction(Middleware::Function fn) : _fn(fn) {}
+  explicit MiddlewareFunction(const Middleware::Function& fn) : _fn(fn) {}
 
   bool run(WebServer &server, Middleware::Callback next) override {
     return _fn(server, next);

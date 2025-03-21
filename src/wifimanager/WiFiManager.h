@@ -21,7 +21,7 @@ class WiFiManager {
   friend class WebServer;
 
 public:
-  WiFiManager(WebServer& server);
+  explicit WiFiManager(WebServer& server);
   virtual ~WiFiManager() {} 
 
   void begin();
@@ -34,12 +34,12 @@ public:
   void setStaticIP(IPAddress ip, IPAddress gateway, IPAddress subnet, IPAddress dns1 = (uint32_t)0, IPAddress dns2 = (uint32_t)0);
 
   // Callback che verrà chiamato quando la connessione WiFi è stabilita
-  void onConnected(std::function<void(const char*, const char*)> callback) {
+  inline void onConnected(const std::function<void(const char*, const char*)>& callback) {
     _connectedCallback = callback;
   }
 
   // Callback che verrà chiamato quando la configurazione è cambiata
-  void onConfigChanged(std::function<void(void)> callback) {
+  inline void onConfigChanged(const std::function<void(void)>& callback) {
     _configChangedCallback = callback;
   }
 
