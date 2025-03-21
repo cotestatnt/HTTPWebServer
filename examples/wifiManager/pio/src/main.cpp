@@ -46,8 +46,10 @@ void setup() {
     while (1) {};
   }
 
-  wifiConfig_t config = getWiFiConfig();
+  // wifiConfig_t config = getWiFiConfig();
 
+  wifiConfig_t config ;
+  
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
     Serial.println("Communication with WiFi module failed!");

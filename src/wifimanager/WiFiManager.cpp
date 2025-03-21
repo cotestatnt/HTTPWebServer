@@ -1,12 +1,12 @@
 #include "WiFiManager.h"
 
-// Costruttore
+
 WiFiManager::WiFiManager(WebServer& server)
   : _server(server) {
 }
 
 void WiFiManager::begin() {
-  // Configura le route per la gestione WiFi
+  // Configure routes for WiFi management
   _server.on("/wifi", HTTP_GET, [this]() {
     this->handleRoot();
   });
@@ -21,7 +21,7 @@ void WiFiManager::begin() {
   });
   _server.enableCORS(true);
 
-  // Se sono state fornite credenziali di default, prova a connettersi
+  // If default credentials are provided, try to connect
   if (_defaultSSID.length() > 0) {
     if (_useStaticIP) {
       connectWithStaticIP(_defaultSSID, _defaultPassword);
@@ -30,9 +30,8 @@ void WiFiManager::begin() {
     }
   }
 }
-
 void WiFiManager::handleClient() {
-  // Il WebServer gestisce già i client, quindi non è necessario fare nulla qui
+  // The WebServer already handles clients, so nothing needs to be done here
 }
 
 void WiFiManager::setDefaultCredentials(const String& ssid, const String& password) {
@@ -49,9 +48,8 @@ void WiFiManager::setStaticIP(IPAddress ip, IPAddress gateway, IPAddress subnet,
   _staticDNS2 = dns2;
 }
 
-// Handlers per le pagine web
+// Handlers for web pages
 void WiFiManager::handleRoot() {
-
   _server.sendHeader(F("Content-Encoding"), F("gzip"));
   _server.send(200, "text/html", (const char*)wifi_min_html, sizeof(wifi_min_html));
 }
@@ -90,7 +88,6 @@ void WiFiManager::handleInfo() {
   jsonResponse += "}";
   _server.send(200, "application/json", jsonResponse);
 }
-
 void WiFiManager::handleSave() {
   String ssid = _server.arg("ssid");
   String password = _server.arg("password");
@@ -102,35 +99,35 @@ void WiFiManager::handleSave() {
 
   bool useStatic = _server.arg("useStatic").toInt();
 
-  // Valida i parametri
+  // Validate parameters
   if (ssid.length() == 0) {
-    _server.send(400, "text/html", "SSID non può essere vuoto");
+    _server.send(400, "text/html", "SSID cannot be empty");
     return;
   }
 
   bool success = false;
 
   if (useStatic) {
-    // Verifica che i parametri IP siano validi
+    // Verify that IP parameters are valid
     IPAddress staticIP, staticGateway, staticSubnet, staticDNS1, staticDNS2;
 
     if (!staticIP.fromString(ip) || !staticGateway.fromString(gateway) || !staticSubnet.fromString(subnet)) {
-      _server.send(400, "text/html", "Parametri IP non validi");
+      _server.send(400, "text/html", "Invalid IP parameters");
       return;
     }
 
-    // DNS sono opzionali
+    // DNS are optional
     if (dns1.length() > 0 && !staticDNS1.fromString(dns1)) {
-      _server.send(400, "text/html", "DNS1 non valido");
+      _server.send(400, "text/html", "Invalid DNS1");
       return;
     }
 
     if (dns2.length() > 0 && !staticDNS2.fromString(dns2)) {
-      _server.send(400, "text/html", "DNS2 non valido");
+      _server.send(400, "text/html", "Invalid DNS2");
       return;
     }
 
-    // Salva la configurazione statica
+    // Save static configuration
     _useStaticIP = true;
     _staticIP = staticIP;
     _staticGateway = staticGateway;
@@ -141,44 +138,40 @@ void WiFiManager::handleSave() {
 
     success = connectWithStaticIP(ssid, password);
   } else {
-    // Usa DHCP
+    // Use DHCP
     _useStaticIP = false;
     success = connectWithDHCP(ssid, password);
   }
 
   if (success) {
-    // Salva le credenziali come default per il riavvio
+    // Save credentials as default for reboot
     _defaultSSID = ssid;
     _defaultPassword = password;
 
-    // Chiama il callback se esiste
+    // Call the callback if it exists
     if (_configChangedCallback) {
       _configChangedCallback();
     }
 
-    // Connesso, carica la pagina info
+    // Connected, load the info page
     _server.send(200, "text/plain", "{\"result\": \"ok\"}");
   } else {
-    _server.send(400, "text/html", "Impossibile connettersi alla rete WiFi");
+    _server.send(400, "text/html", "Unable to connect to the WiFi network");
   }
 }
 
 bool WiFiManager::connectWithStaticIP(const String& ssid, const String& password) {
-
-  // Configura IP statico
-  // WiFi.config(_staticIP, _staticGateway, _staticSubnet, _staticDNS1, _staticDNS2);
-
+  // Configure static IP
+  WiFi.config(_staticIP, _staticDNS1, _staticGateway, _staticSubnet);
+  WiFi.setDNS(_staticDNS1, _staticDNS2);
   return connectWithDHCP(ssid, password);
 }
-
 bool WiFiManager::connectWithDHCP(const String& ssid, const String& password) {
-
-  // Attendi fino a 20 secondi per la connessione
+  // Wait up to 20 seconds for the connection
   int timeout = 10;
   while (WiFi.status() != WL_CONNECTED && timeout > 0) {
-    // Connetti alla rete WiFi con DHCP
-    WiFi.begin(ssid.c_str(), password.c_str());
-
+    // Connect to the WiFi network using DHCP
+    callBeginIfExists(WiFi, ssid.c_str(), password.c_str(), WIFI_MODE_APSTA);
     delay(2000);
     timeout--;
   }
