@@ -31,7 +31,13 @@ jobs:
             platforms: |
               - name: arduino:renesas_uno
 
-    steps:
+    steps:        
+      - name: Install arduino-cli
+        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
+        
+      - name: Install Ethernet
+        run: arduino-cli lib install Ethernet
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
