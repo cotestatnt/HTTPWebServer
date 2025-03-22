@@ -3,7 +3,7 @@
 #define NETWORK_CONFIG_H
 
 // Modify this value to enable Ethernet
-#define HARDWARE_TYPE USING_ETHERNET
+#define HARDWARE_TYPE USING_WIFI
 
 // Supported modes
 #define USING_WIFI      1
