@@ -1,0 +1,5 @@
+{
+    "board": "arduino:renesas_uno:unor4wifi",
+    "port": "COM8",
+    "sketch": "ethernetServer.ino"
+}

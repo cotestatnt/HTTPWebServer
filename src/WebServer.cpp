@@ -21,12 +21,6 @@
 */
 
 #include <Arduino.h>
-// #include <esp32-hal-log.h>
-
-// #include "FS.h"
-// #include "NetworkServer.h"
-// #include "NetworkClient.h"
-
 #include "libb64/base64.h"
 #include "libb64/cdecode.h"
 #include "libb64/cencode.h"
@@ -46,24 +40,12 @@ static const char Content_Length[] = "Content-Length";
 static const char ETAG_HEADER[] = "If-None-Match";
 
 
-#if defined(ESP32)
-WebServer::WebServer(IPAddress addr, int port) : _server(addr, port) {
-  log_debug("WebServer::Webserver(addr=%s, port=%d)", addr.toString().c_str(), port);
-}
+
 WebServer::WebServer(int port) : _server(port) {
   log_debug("WebServer::Webserver(port=%d)", port);
 }
-#else
-WebServer::WebServer(int port) : _server(port) {
-  log_debug("WebServer::Webserver(port=%d)", port);
-}
-#endif
 
 WebServer::~WebServer() {
-#if defined(ESP32)
-  _server.close();
-#endif
-
   _clearRequestHeaders();
   _clearResponseHeaders();
   delete _chain;
@@ -80,10 +62,6 @@ WebServer::~WebServer() {
 void WebServer::begin() {
   close();
   _server.begin();
-
-#if defined(ESP32)
-  _server.setNoDelay(true);
-#endif
 }
 
 

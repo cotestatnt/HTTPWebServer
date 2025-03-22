@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Sensori: Temperatura e Pressione</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+  color: #999999;
+  word-wrap: break-word;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.gauge-container {
+  margin: 30px;
+  display: inline-block;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+  padding: 20px;
+}
+
+.gauge-holder {
+  width: 220px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.circle-mask {
+  width: 220px;
+  height: 106px;
+  padding: 5px 10px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.circle, .circle-inner {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 10px solid #ccc;
+  position: relative;
+}
+
+.circle-inner {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  border: 10px solid transparent;
+  border-bottom: 10px solid #ec567b;
+  border-left: 10px solid #ec567b;
+  transition: transform 0.5s ease-in-out;
+}
+
+.circle-inner:after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  border: 4px solid #ec567b;
+  left: 14px;
+  top: 14px;
+}
+
+.percentage {
+  margin: 10px 0;
+  font-weight: bold;
+  color: #ed557b;
+  font-size: 18px;
+}
+
+.unit {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.min-max {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+  margin-top: 10px;
+}
+
+.min-max span {
+  width: 30px;
+}
+
+.gauge-copy {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  position: absolute;
+  background: #b4dbc0;
+  top: 65%;
+  left: 50%;
+  transition: transform 0.5s ease-in-out;
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.gauge-copy:before {
+  content: "";
+  position: absolute;
+  border: 7px solid transparent;
+  border-right: 70px solid #b4dbc0;
+  left: -75px;
+  top: 8px;
+  width: 0;
+  height: 0;
+}
+
+.gauge-copy:after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f3ffbd;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>
+</head>
+<body>
+
+<div id="gauges">
+  <!-- I gauge saranno generati automaticamente -->
+</div>
+
+<script>
+
+// Creazione dinamica del container del gauge
+function createGauge(title, minValue, maxValue, precision, unit) {  
+  const gaugeContainer = document.createElement('div');
+  gaugeContainer.className = 'gauge-container';
+  gaugeContainer.innerHTML = `
+    <h3>${title}</h3>
+    <div class="gauge-holder">
+      <div class="circle-mask">
+        <div class="circle">
+          <div class="circle-inner"></div>
+        </div>
+      </div>
+      <div class="gauge-copy"></div>      
+      <div class="min-max">
+        <span>${minValue}</span>
+        <span>${maxValue}</span>
+      </div>
+      <div class="percentage"></div>
+    </div>
+  `;
+
+  document.getElementById('gauges').appendChild(gaugeContainer);
+
+  function updateGauge(value) {
+    value = Math.max(minValue, Math.min(maxValue, value)); // Limita il valore all'intervallo specificato
+    const percentage = ((value - minValue) / (maxValue - minValue)) * 100;
+    const rotation = percentage * 1.8 - 45;
+
+    const circleInner = gaugeContainer.querySelector('.circle-inner');
+    const percentageElement = gaugeContainer.querySelector('.percentage');
+    const gaugeCopy = gaugeContainer.querySelector('.gauge-copy');
+
+    circleInner.style.transform = `rotate(${rotation}deg)`;
+    gaugeCopy.style.transform = `translate(-50%, -50%) rotate(${percentage * 1.8}deg)`;
+    percentageElement.textContent = value.toFixed(precision) + ' ' + unit;
+  }
+
+  // Imposta un valore iniziale
+  updateGauge((minValue + maxValue) / 2);
+  return updateGauge;
+}
+
+// Fetch dei valori aggiornati dal microcontrollore
+function fetchSensorData(key, gauge) {
+  fetch(`/sensor?element=${key}`)
+    .then(response => response.json())
+    .then(data => {
+      const value = data.value;      
+      gauge(value);
+    })
+    .catch(error => console.error(`Errore nel recupero dei dati per il sensore ${key}:`, error));
+}
+  
+// Creazione e aggiornamento dei gauge
+const temperatureGauge = createGauge('Temperatura', 0, 100, 1, '°C');
+const pressureGauge = createGauge('Pressione', 0, 2000, 0, 'mBar');
+
+// Richiedi valori aggiornati ogni 2 secondi
+function updateSensors() {
+  fetchSensorData("Temperatura", temperatureGauge);
+  fetchSensorData("Pressione", pressureGauge);  
+}
+setInterval(updateSensors, 2000);
+</script>
+</body>
+</html>

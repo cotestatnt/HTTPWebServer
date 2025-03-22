@@ -1,22 +1,19 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Ethernet.h>
-
-// To enable Ethernet support, set #define HARDWARE_TYPE USING_ETHERNET
-#include <NetworkConfig.h>    
-
-#include <HTTPWebServer.h>
 #include <Preferences.h>
 
-// Source HTML page in /data/index.html
-#include "index_htm.h" 
+// To enable Ethernet support, the NetworkConfig.h file must be modified
+#include <NetworkConfig.h>
+#include <HTTPWebServer.h>
 
-Preferences prefs;
-WebServer server(80);
+// Source HTML page in /data/index.html
+#include "index_html.h" 
 
 byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 IPAddress ip(192, 168, 1, 177);
 
+WebServer server(80);
 
 float temperature = 45.5;
 float pressure = 1500.0;
@@ -44,9 +41,10 @@ void handlegetSensor() {
   }
 }
 
-
-void setup() {
+void setup(void) {
+  //Initialize serial and wait for port to open:
   Serial.begin(115200);
+  while (!Serial) ; // wait for serial port to connect. Needed for native USB port only
 
   Serial.println("Ethernet WebServer Example");
   Ethernet.init(10);
@@ -62,7 +60,7 @@ void setup() {
   if (Ethernet.linkStatus() == LinkOFF) {
     Serial.println("Ethernet cable is not connected.");
   }
-  
+
   server.on("/", []() {
     server.sendHeader(F("Content-Encoding"), F("gzip"));
     server.send(200, "text/html", (const char*)index_html, sizeof(index_html));
@@ -70,13 +68,14 @@ void setup() {
 
   server.on("/sensor", handlegetSensor);
 
- 
+  // If the user does not define a custom handler, the one included in the library will be used.
+  // server.onNotFound(handleNotFound);
+
   server.begin();
   Serial.print("HTTP server started at ");
-  Serial.println(Ethernet.localIP());
+  Serial.println(Ethernet.localIP());;
 }
 
-void loop() {
-  // Gestisci le richieste HTTP
+void loop(void) {
   server.handleClient();
 }

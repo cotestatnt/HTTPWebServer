@@ -32,13 +32,30 @@
 #include "websocket/WebSocketsServer.h"
 #include "wifimanager/WiFiManager.h"
 
-#if defined(ARDUINO_UNOR4_WIFI)
-  #include "WiFi.h"
-  #include "WiFiClient.h"
-  #include "WiFiServer.h"
-  #define NetworkClient WiFiClient
-  #define NetworkServer WiFiServer
+#include "NetworkConfig.h"
+
+#ifndef HARDWARE_TYPE
+  #error "Define HARDWARE_TYPE as USING_WIFI or USING_ETHERNET"
 #endif
+
+// Verifica la modalità selezionata
+#if HARDWARE_TYPE == USING_WIFI
+  #if defined(ARDUINO_UNOR4_WIFI)
+    #include "WiFi.h"
+    #include "WiFiClient.h"
+    #include "WiFiServer.h"
+    #define NetworkClient WiFiClient
+    #define NetworkServer WiFiServer
+  #endif
+#elif HARDWARE_TYPE == USING_ETHERNET
+  #include <SPI.h>
+  #include <Ethernet.h>
+  #define NetworkClient EthernetClient
+  #define NetworkServer EthernetServer
+#else
+  #error "HARDWARE_TYPE not valid valida! Use USING_WIFI or USING_ETHERNET"
+#endif
+
 
 #ifndef FPSTR
 #define FPSTR(p) (p)  // Su piattaforme senza FPSTR, usiamo semplicemente la stringa
@@ -110,19 +127,10 @@ typedef struct {
 #include "middleware/Middleware.h"
 #include "RequestHandler.h"
 
-// namespace fs {
-// class FS;
-// }
 
 class WebServer {
 public:
-#if defined(ESP32)
-  explicit WebServer(IPAddress addr, int port = 80);
   explicit WebServer(int port = 80);
-#else
-  explicit WebServer(int port = 80);
-#endif
-
   virtual ~WebServer();
 
   virtual void begin();
@@ -340,4 +348,4 @@ protected:
   MiddlewareChain *_chain = nullptr;
 };
 
-#endif  //ESP8266WEBSERVER_H
+#endif  //WEBSERVER_H
