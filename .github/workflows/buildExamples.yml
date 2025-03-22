@@ -36,7 +36,7 @@ jobs:
         run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
         
       - name: Install Ethernet
-        run: ARDUINO_LIBRARY_ENABLE_UNSAFE_INSTALL=true arduino-cli lib install --git-url https://github.com/arduino-libraries/Ethernet#v2.0.2
+        run: arduino-cli lib install Ethernet
 
       - name: Checkout repository
         uses: actions/checkout@v4
