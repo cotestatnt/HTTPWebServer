@@ -40,7 +40,7 @@
 
 // Verifica la modalità selezionata
 #if HARDWARE_TYPE == USING_WIFI
-  #if defined(ARDUINO_UNOR4_WIFI)
+  #if defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_SAMD)
     #include "WiFi.h"
     #include "WiFiClient.h"
     #include "WiFiServer.h"

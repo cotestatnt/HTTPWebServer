@@ -1,0 +1,5 @@
+{
+    "board": "arduino:samd:nano_33_iot",
+    "sketch": "wifiManager.ino",
+    "port": "COM8"
+}
