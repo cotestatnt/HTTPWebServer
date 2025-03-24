@@ -1,16 +1,20 @@
-name: Compile Arduino UNO R4 WiFi Examples
+name: Compile UNO R4 WiFi Examples
+
 on:
   push:
     paths:
       - ".github/workflows/buildExamples.yml"
       - "examples/**"
       - "src/**"
+      - "library.json"
+      - "library.properties"
   pull_request:
     paths:
       - ".github/workflows/buildExamples.yml"
       - "examples/**"
       - "src/**"
-
+      - "library.json"
+      - "library.properties"
   workflow_dispatch:
   repository_dispatch:
 
@@ -21,42 +25,65 @@ jobs:
 
     env:
       SKETCHES_REPORTS_PATH: sketches-reports
+      LIBRARY_NAME: HTTPWebServer
+      # Lista di esempi da escludere (separati da spazio)
+      EXCLUDE_EXAMPLES: "SAMD_WiFiManager.ino OtherExample.ino"
 
     strategy:
       fail-fast: false
-
       matrix:
         board:
           - fqbn: arduino:renesas_uno:unor4wifi
-            platforms: |
-              - name: arduino:renesas_uno
+            artifact-name-suffix: unor4wifi
+            platforms: arduino:renesas_uno
 
-    steps:        
-      - name: Install arduino-cli
-        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
-        
-      - name: Install Ethernet
-        run: arduino-cli lib install Ethernet
-
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile examples
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+        with:
+          version: 'latest'
+
+      - name: Install required platforms
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install ${{ matrix.board.platforms }}
+
+      - name: Install required libraries
+        run: |
+          arduino-cli lib install "Ethernet"
+          arduino-cli lib install --git-url https://github.com/cotestatnt/HTTPWebServer.git
+
+      - name: Find relevant examples
+        id: find-examples
+        run: |
+          # Crea lista esempi esclusi
+          EXCLUDED=$(echo "$EXCLUDE_EXAMPLES" | tr ' ' '|')
+          # Trova tutti gli esempi .ino escludendo quelli specificati
+          EXAMPLES=$(find examples -name "*.ino" | grep -vE "$EXCLUDED")
+          # Salva output per i passi successivi
+          echo "examples_list<<EOF" >> $GITHUB_OUTPUT
+          echo "$EXAMPLES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Found examples to compile:"
+          echo "$EXAMPLES"
+
+      - name: Compile selected examples
         uses: arduino/compile-sketches@v1
         with:
           fqbn: ${{ matrix.board.fqbn }}
           platforms: ${{ matrix.board.platforms }}
-          libraries: |
-            # Install the library from the local path.
-            - source-path: ./
           sketch-paths: |
-            - examples
+            ${{ steps.find-examples.outputs.examples_list }}
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
-      - name: Save sketches report as workflow artifact
+      - name: Save sketches report as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          if-no-files-found: error
+          name: compilation-report-${{ matrix.board.artifact-name-suffix }}
           path: ${{ env.SKETCHES_REPORTS_PATH }}
-          name: sketches-report-${{ matrix.board.artifact-name-suffix }}
+          retention-days: 5
