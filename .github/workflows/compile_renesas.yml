@@ -40,7 +40,7 @@ jobs:
           mkdir -p compile-examples
           cp -r examples/* compile-examples/
           # Remove excluded examples
-          find compile-examples -name "SAMD_WiFiManager.ino" -delete
+          find compile-examples -name "SAMD_wifiManager.ino" -delete
           # If you need to exclude more, add more lines like:
           # find compile-examples -name "OtherExample.ino" -delete
           
