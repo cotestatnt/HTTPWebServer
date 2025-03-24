@@ -20,70 +20,67 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.board.fqbn }}
+    name: UNO R4 WiFi
     runs-on: ubuntu-latest
 
     env:
       SKETCHES_REPORTS_PATH: sketches-reports
       LIBRARY_NAME: HTTPWebServer
-      # Lista di esempi da escludere (separati da spazio)
-      EXCLUDE_EXAMPLES: "SAMD_WiFiManager.ino OtherExample.ino"
-
-    strategy:
-      fail-fast: false
-      matrix:
-        board:
-          - fqbn: arduino:renesas_uno:unor4wifi
-            artifact-name-suffix: unor4wifi
-            platforms: arduino:renesas_uno
+      EXCLUDE_EXAMPLES: "SAMD_WiFiManager.ino"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Arduino CLI
-        uses: arduino/setup-arduino-cli@v1
-        with:
-          version: 'latest'
-
-      - name: Install required platforms
+      - name: Install arduino-cli
         run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
+          arduino-cli version
+
+      - name: Setup Arduino CLI
+        run: |
+          arduino-cli config init
           arduino-cli core update-index
-          arduino-cli core install ${{ matrix.board.platforms }}
+
+      - name: Install UNO R4 platform
+        run: arduino-cli core install arduino:renesas_uno
 
       - name: Install required libraries
         run: |
-          arduino-cli lib install "Ethernet"
+          arduino-cli lib install Ethernet
           arduino-cli lib install --git-url https://github.com/cotestatnt/HTTPWebServer.git
 
       - name: Find relevant examples
         id: find-examples
         run: |
-          # Crea lista esempi esclusi
           EXCLUDED=$(echo "$EXCLUDE_EXAMPLES" | tr ' ' '|')
-          # Trova tutti gli esempi .ino escludendo quelli specificati
-          EXAMPLES=$(find examples -name "*.ino" | grep -vE "$EXCLUDED")
-          # Salva output per i passi successivi
+          EXAMPLES=$(find examples -name "*.ino" | grep -vE "$EXCLUDED" || echo "")
           echo "examples_list<<EOF" >> $GITHUB_OUTPUT
           echo "$EXAMPLES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          echo "Found examples to compile:"
+          echo "📋 Examples to compile:"
           echo "$EXAMPLES"
 
       - name: Compile selected examples
-        uses: arduino/compile-sketches@v1
-        with:
-          fqbn: ${{ matrix.board.fqbn }}
-          platforms: ${{ matrix.board.platforms }}
-          sketch-paths: |
-            ${{ steps.find-examples.outputs.examples_list }}
-          enable-deltas-report: true
-          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+        if: steps.find-examples.outputs.examples_list != ''
+        run: |
+          for sketch in ${{ steps.find-examples.outputs.examples_list }}; do
+            echo "🔨 Compiling $sketch"
+            arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi $sketch
+          done
 
-      - name: Save sketches report as artifact
+      - name: Create compilation report
+        if: always()
+        run: |
+          mkdir -p ${{ env.SKETCHES_REPORTS_PATH }}
+          date > ${{ env.SKETCHES_REPORTS_PATH }}/report.txt
+          echo "Compiled examples:" >> ${{ env.SKETCHES_REPORTS_PATH }}/report.txt
+          echo "${{ steps.find-examples.outputs.examples_list }}" >> ${{ env.SKETCHES_REPORTS_PATH }}/report.txt
+
+      - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: compilation-report-${{ matrix.board.artifact-name-suffix }}
+          name: compilation-report
           path: ${{ env.SKETCHES_REPORTS_PATH }}
           retention-days: 5
