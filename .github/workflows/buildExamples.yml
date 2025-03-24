@@ -39,26 +39,25 @@ jobs:
         run: arduino-cli lib install Ethernet
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  
 
-      - name: Find relevant examples
-        id: find-examples
-        run: |
-          EXCLUDED=$(echo "$EXCLUDE_EXAMPLES" | tr ' ' '|')
-          EXAMPLES=$(find examples -name "*.ino" | grep -vE "$EXCLUDED" || echo "")
-          echo "examples_list<<EOF" >> $GITHUB_OUTPUT
-          echo "$EXAMPLES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "📋 Examples to compile:"
-          echo "$EXAMPLES"
-
-      - name: Compile selected examples
-        if: steps.find-examples.outputs.examples_list != ''
-        run: |
-          for sketch in ${{ steps.find-examples.outputs.examples_list }}; do
-            echo "🔨 Compiling $sketch"
-            arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi $sketch
-          done
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          libraries: |
+            # Install the library from the local path.
+            - source-path: ./
+          sketch-paths: |
+            - examples
+          sketches: |
+            # Include all sketches in examples directory
+            - examples/**/*.ino
+            # Exclude specific sketches from compilation
+            - exclude:examples/**/SAMD_WiFiManager.ino
+          enable-deltas-report: true
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
       # - name: Compile examples
       #   uses: arduino/compile-sketches@v1
@@ -73,9 +72,9 @@ jobs:
       #     enable-deltas-report: true
       #     sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
-      # - name: Save sketches report as workflow artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     if-no-files-found: error
-      #     path: ${{ env.SKETCHES_REPORTS_PATH }}
-      #     name: sketches-report-${{ matrix.board.artifact-name-suffix }}
+      - name: Save sketches report as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          path: ${{ env.SKETCHES_REPORTS_PATH }}
+          name: sketches-report-${{ matrix.board.artifact-name-suffix }}
