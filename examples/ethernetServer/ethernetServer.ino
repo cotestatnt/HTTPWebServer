@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Ethernet.h>
-#include <Preferences.h>
 
 // To enable Ethernet support, the NetworkConfig.h file must be modified
 #include <NetworkConfig.h>

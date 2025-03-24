@@ -1,5 +1,5 @@
 #include "WiFiManager.h"
-
+#if HARDWARE_TYPE == USING_WIFI
 
 WiFiManager::WiFiManager(WebServer& server)
   : _server(server) {
@@ -242,3 +242,6 @@ String WiFiManager::getEncryptionTypeString(uint8_t encType) {
   }
 #endif
 }
+
+
+#endif

@@ -1,6 +1,10 @@
 #ifndef WIFI_MANAGER_H
 #define WIFI_MANAGER_H
 
+#include "../NetworkConfig.h"
+
+#if HARDWARE_TYPE == USING_WIFI
+
 #include <Arduino.h>
 #include <vector>
 
@@ -151,5 +155,7 @@ private:
   bool connectWithStaticIP(const String &ssid, const String &password);
   bool connectWithDHCP(const String &ssid, const String &password);
 };
+
+#endif
 
 #endif // WIFI_MANAGER_H

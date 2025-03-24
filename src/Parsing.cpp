@@ -28,6 +28,7 @@
 #include "WebServer.h"
 #include "utils/mimetable.h"
 #include "Logging.h"
+#include "NetworkConfig.h"
 
 #ifndef WEBSERVER_MAX_POST_ARGS
 #define WEBSERVER_MAX_POST_ARGS 32
@@ -368,7 +369,12 @@ int WebServer::_uploadReadByte(NetworkClient &client) {
   if (res < 0) {
     // keep trying until you either read a valid byte or timeout
     const unsigned long startMillis = millis();
+#if HARDWARE_TYPE == USING_ETHERNET
+    const unsigned long timeoutIntervalMillis = 5000;
+#else
     const unsigned long timeoutIntervalMillis = client.getTimeout();
+#endif
+
     bool timedOut = false;
     for (;;) {
       if (!client.connected()) {

@@ -30,7 +30,7 @@ bool LoggingMiddleware::run(WebServer &server, Middleware::Callback next) {
   int n = server.headers();
   for (int i = 0; i < n; i++) {
     String v = server.header(i);
-    if (!v.isEmpty()) {
+    if (v.length()) {
       // because these 2 are always there, eventually empty: "Authorization", "If-None-Match"
       _out->print(F("> "));
       _out->print(server.headerName(i));

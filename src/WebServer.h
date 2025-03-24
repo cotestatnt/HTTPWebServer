@@ -22,16 +22,13 @@
 
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
-
+#include <Arduino.h>
 #include <functional>
 #include <memory>
 #include "HTTP_Method.h"
 #include "Uri.h"
 #include "Logging.h"
-
 #include "websocket/WebSocketsServer.h"
-#include "wifimanager/WiFiManager.h"
-
 #include "NetworkConfig.h"
 
 #ifndef HARDWARE_TYPE
@@ -40,7 +37,7 @@
 
 // Verifica la modalità selezionata
 #if HARDWARE_TYPE == USING_WIFI
-  #if defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_SAMD)
+  #if defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_NRF52840)
     #include "WiFi.h"
     #include "WiFiClient.h"
     #include "WiFiServer.h"
@@ -56,9 +53,18 @@
   #error "HARDWARE_TYPE not valid valida! Use USING_WIFI or USING_ETHERNET"
 #endif
 
+#if HARDWARE_TYPE == USING_WIFI
+#include "wifimanager/WiFiManager.h"
+#endif
+
+
+
+#ifndef PGM_VOID_P
+#define PGM_VOID_P  const void *
+#endif
 
 #ifndef FPSTR
-#define FPSTR(p) (p)  // Su piattaforme senza FPSTR, usiamo semplicemente la stringa
+#define FPSTR(p) (p)
 #endif
 
 enum HTTPUploadStatus {

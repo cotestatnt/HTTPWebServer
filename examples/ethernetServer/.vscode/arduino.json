@@ -1,5 +1,6 @@
 {
-    "board": "arduino:renesas_uno:unor4wifi",
+    "board": "Seeeduino:nrf52:xiaonRF52840Sense",
     "port": "COM8",
-    "sketch": "ethernetServer.ino"
+    "sketch": "ethernetServer.ino",
+    "configuration": "softdevice=s140v6,debug=l1"
 }

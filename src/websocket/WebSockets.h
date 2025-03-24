@@ -41,6 +41,7 @@
 #endif
 
 #include "WebSocketsVersion.h"
+#include "../NetworkConfig.h"
 
 #ifndef NODEBUG_WEBSOCKETS
 #ifdef DEBUG_ESP_PORT

@@ -49,7 +49,7 @@ bool AuthenticationMiddleware::isAllowed(WebServer &server) const {
     return server.authenticate(_callback);
   }
 
-  if (!_username.isEmpty() && !_password.isEmpty()) {
+  if (_username.length() && _password.length()) {
     if (_hash) {
       return server.authenticateBasicSHA1(_username.c_str(), _password.c_str());
     } else {
@@ -65,7 +65,7 @@ bool AuthenticationMiddleware::run(WebServer &server, Middleware::Callback next)
 
   if (_callback) {
     authenticationRequired = !server.authenticate(_callback);
-  } else if (!_username.isEmpty() && !_password.isEmpty()) {
+  } else if (_username.length() && _password.length()) {
     if (_hash) {
       authenticationRequired = !server.authenticateBasicSHA1(_username.c_str(), _password.c_str());
     } else {

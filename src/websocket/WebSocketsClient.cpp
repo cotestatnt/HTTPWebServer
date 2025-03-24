@@ -103,7 +103,7 @@ void WebSocketsClient::begin(String host, uint16_t port, String url, String prot
 }
 
 void WebSocketsClient::begin(IPAddress host, uint16_t port, const char * url, const char * protocol) {
-    return begin(host.toString().c_str(), port, url, protocol);
+    return begin(ipToString(host), port, url, protocol);
 }
 
 #if defined(HAS_SSL)

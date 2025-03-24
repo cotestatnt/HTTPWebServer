@@ -117,6 +117,13 @@ class WebSocketsClient : protected WebSockets {
     String _host;
     uint16_t _port;
 
+    // Some implementation of IPAddress don't have the methos toString()
+    const char* ipToString(IPAddress& ip) {
+        char szRet[16];
+        snprintf(szRet, sizeof(szRet), "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+        return String(szRet).c_str();
+    }
+
 #if defined(HAS_SSL)
 #ifdef SSL_AXTLS
     String _fingerprint;
