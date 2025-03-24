@@ -33,7 +33,10 @@ jobs:
         run: arduino-cli lib install Ethernet
       
       - name: Install Ethernet
-        run: arduino-cli lib install Ethernet
+        run: arduino-cli lib install FlashStorage_SAMD
+
+      - name: Install WiFiNINA
+        run: arduino-cli lib install WiFiNINA
         
       - name: Checkout repository
         uses: actions/checkout@v4
