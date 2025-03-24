@@ -55,7 +55,7 @@ jobs:
             # Include all sketches in examples directory
             - examples/**/*.ino
             # Exclude specific sketches from compilation
-            - exclude:examples/**/SAMD_WiFiManager.ino
+            - exclude:examples/**/SAMD_wifiManager.ino
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
