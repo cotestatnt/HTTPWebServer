@@ -1,54 +1,45 @@
-name: Compile UNO R4 WiFi Examples
-
+name: Compile Arduino UNO R4 WiFi Examples
 on:
   push:
     paths:
       - ".github/workflows/buildExamples.yml"
       - "examples/**"
       - "src/**"
-      - "library.json"
-      - "library.properties"
   pull_request:
     paths:
       - ".github/workflows/buildExamples.yml"
       - "examples/**"
       - "src/**"
-      - "library.json"
-      - "library.properties"
+
   workflow_dispatch:
   repository_dispatch:
 
 jobs:
   build:
-    name: UNO R4 WiFi
+    name: ${{ matrix.board.fqbn }}
     runs-on: ubuntu-latest
 
     env:
       SKETCHES_REPORTS_PATH: sketches-reports
-      LIBRARY_NAME: HTTPWebServer
-      EXCLUDE_EXAMPLES: "SAMD_WiFiManager.ino"
 
-    steps:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          - fqbn: arduino:renesas_uno:unor4wifi
+            platforms: |
+              - name: arduino:renesas_uno
+
+    steps:        
+      - name: Install arduino-cli
+        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
+        
+      - name: Install Ethernet
+        run: arduino-cli lib install Ethernet
+
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install arduino-cli
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
-          arduino-cli version
-
-      - name: Setup Arduino CLI
-        run: |
-          arduino-cli config init
-          arduino-cli core update-index
-
-      - name: Install UNO R4 platform
-        run: arduino-cli core install arduino:renesas_uno
-
-      - name: Install required libraries
-        run: |
-          arduino-cli lib install Ethernet
-          arduino-cli lib install --git-url https://github.com/cotestatnt/HTTPWebServer.git
 
       - name: Find relevant examples
         id: find-examples
@@ -69,18 +60,22 @@ jobs:
             arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi $sketch
           done
 
-      - name: Create compilation report
-        if: always()
-        run: |
-          mkdir -p ${{ env.SKETCHES_REPORTS_PATH }}
-          date > ${{ env.SKETCHES_REPORTS_PATH }}/report.txt
-          echo "Compiled examples:" >> ${{ env.SKETCHES_REPORTS_PATH }}/report.txt
-          echo "${{ steps.find-examples.outputs.examples_list }}" >> ${{ env.SKETCHES_REPORTS_PATH }}/report.txt
+      # - name: Compile examples
+      #   uses: arduino/compile-sketches@v1
+      #   with:
+      #     fqbn: ${{ matrix.board.fqbn }}
+      #     platforms: ${{ matrix.board.platforms }}
+      #     libraries: |
+      #       # Install the library from the local path.
+      #       - source-path: ./
+      #     sketch-paths: |
+      #       - examples
+      #     enable-deltas-report: true
+      #     sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
-      - name: Upload report
-        if: always()
+      - name: Save sketches report as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: compilation-report
+          if-no-files-found: error
           path: ${{ env.SKETCHES_REPORTS_PATH }}
-          retention-days: 5
+          name: sketches-report-${{ matrix.board.artifact-name-suffix }}
