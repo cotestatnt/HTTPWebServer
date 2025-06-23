@@ -4,7 +4,7 @@
 /* Original Size: 4857 bytes */
 /* Compressed Size: 1781 bytes */
 /* Compression Ratio: 36.7% */
-/* Compression: GZIP (ricordati di aggiungere "Content-Encoding: gzip" negli header HTTP) */
+/* Compression: GZIP (add "Content-Encoding: gzip" as HTTP header) */
 
 #define INDEX_HTML_SIZE 1781
 

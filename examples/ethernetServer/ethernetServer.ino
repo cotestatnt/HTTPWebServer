@@ -2,16 +2,18 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
-// To enable Ethernet support, the NetworkConfig.h file must be modified
+//////////////////////////////////////////////////////////////////////////
+// To enable Ethernet support, the NetworkConfig.h file must be updated //
+//////////////////////////////////////////////////////////////////////////
 #include <NetworkConfig.h>
 #include <HTTPWebServer.h>
+///////////////////////////////////////////////////////////////////////////
 
 // Source HTML page in /data/index.html
 #include "index_html.h" 
 
 byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 IPAddress ip(192, 168, 1, 177);
-
 WebServer server(80);
 
 float temperature = 45.5;

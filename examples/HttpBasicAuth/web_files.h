@@ -11,12 +11,12 @@ const char index_html[] PROGMEM = R"rawliteral(
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
   <div class="text-center grid grid-cols-2 gap-8">
     <div>
-      <h1 class="text-2xl font-bold mb-4">Sensore 101</h1>
+      <h1 class="text-2xl font-bold mb-4">Sensor 101</h1>
       <canvas id="gaugeCanvas101" width="200" height="100"></canvas>
       <p id="sensorValue101" class="text-4xl font-bold text-green-400 mt-4">--</p>
     </div>
     <div>
-      <h1 class="text-2xl font-bold mb-4">Sensore 102</h1>
+      <h1 class="text-2xl font-bold mb-4">Sensor 102</h1>
       <canvas id="gaugeCanvas102" width="200" height="100"></canvas>
       <p id="sensorValue102" class="text-4xl font-bold text-blue-400 mt-4">--</p>
     </div>

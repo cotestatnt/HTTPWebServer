@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+examples/ledMatrix/secrets.h
+/examples/wifiManager/.vscode
+/examples/ledMatrix/.vscode
+/examples/websocketEcho/.vscode
+*.json
+examples/stringLiteral/secrets.h
+examples/stringLiteral/secrets.h

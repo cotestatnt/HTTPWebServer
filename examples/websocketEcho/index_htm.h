@@ -1,3 +1,4 @@
+
 // WebSocket terminal page
 
 const char index_html[] PROGMEM = R"rawliteral(
@@ -6,7 +7,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Terminale WebSocket</title>
+      <title>WebSocket Terminal</title>
       <style>
         body { font-family: monospace; background: black; color: lime; }
         #terminal { height: 300px; overflow-y: auto; border: 1px solid lime; padding: 10px; }
@@ -14,20 +15,20 @@ const char index_html[] PROGMEM = R"rawliteral(
       </style>
     </head>
     <body>
-      <h2>Terminale WebSocket</h2>
+      <h2>WebSocket Terminal</h2>
       <div id="terminal"></div>
-      <input type="text" id="input" placeholder="Invia comando..." autofocus>
+      <input type="text" id="input" placeholder="Send command..." autofocus>
       <script>
         const socket = new WebSocket('ws://' + location.hostname + ':81/');
         const terminal = document.getElementById('terminal');
         const input = document.getElementById('input');
-        socket.onopen = () => terminal.innerHTML += '<p>Connesso al WebSocket</p>';
+        socket.onopen = () => terminal.innerHTML += '<p>WebSocket connected</p>';
         socket.onmessage = event => {
           terminal.innerHTML += `<p>&gt; ${event.data}</p>`;
           terminal.scrollTop = terminal.scrollHeight;
         };
-        socket.onerror = () => terminal.innerHTML += '<p style="color: red;">Errore di connessione</p>';
-        socket.onclose = () => terminal.innerHTML += '<p style="color: orange;">Connessione chiusa</p>';
+        socket.onerror = () => terminal.innerHTML += '<p style="color: red;">Connection error</p>';
+        socket.onclose = () => terminal.innerHTML += '<p style="color: orange;">Connection closed</p>';
         input.addEventListener('keypress', event => {
           if (event.key === 'Enter') {
             const message = input.value;
