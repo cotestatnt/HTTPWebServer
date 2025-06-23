@@ -63,7 +63,7 @@ const opts = {
         document.getElementById(valueElement).textContent = value;
         gauge.set(value);
       })
-      .catch(error => console.error(`Errore nel recupero dei dati per il sensore ${sensorId}:`, error));
+      .catch(error => console.error(`Error with sensor ${sensorId}:`, error));
   }
   function updateSensors() {
     fetchSensorData(101, gauge101, "sensorValue101");
