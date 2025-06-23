@@ -1,2 +1,2 @@
-#define SECRET_SSID "PuccosNET"
-#define SECRET_PASS "Tole76tnt"
+#define SECRET_SSID ""
+#define SECRET_PASS ""
