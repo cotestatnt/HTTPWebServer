@@ -25,16 +25,7 @@
 #include <Arduino.h>
 #include <functional>
 #include <memory>
-#include "HTTP_Method.h"
-#include "HTTPUri.h"
-#include "Logging.h"
-#include "websocket/WebSocketsServer.h"
 #include "NetworkConfig.h"
-
-// Forward declarations
-class Middleware;
-class MiddlewareChain;
-class RequestHandler;
 
 #ifndef HARDWARE_TYPE
   #error "Define HARDWARE_TYPE as USING_WIFI or USING_ETHERNET"
@@ -42,34 +33,39 @@ class RequestHandler;
 
 // Verifica la modalità selezionata
 #if HARDWARE_TYPE == USING_WIFI
-  #if defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_NRF52840)
+  #if defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_NRF52840) ||defined(ARDUINO_ARCH_RP2040)
     #include "WiFi.h"
     #include "WiFiClient.h"
     #include "WiFiServer.h"
     #define NetworkClient WiFiClient
     #define NetworkServer WiFiServer
-  #elif defined(ARDUINO_ARCH_RP2040)
-    #include "WiFi.h"
-    #define NetworkClient WiFiClient
-    #define NetworkServer WiFiServer
   #endif
-#elif HARDWARE_TYPE == USING_WIFININA
-  #include <SPI.h>
-  #include <WiFiNINA.h>
-  #define NetworkClient WiFiClient
-  #define NetworkServer WiFiServer
 #elif HARDWARE_TYPE == USING_ETHERNET
   #include <SPI.h>
   #include <Ethernet.h>
   #define NetworkClient EthernetClient
   #define NetworkServer EthernetServer
+#elif HARDWARE_TYPE == USING_WIFININA
+  #include <SPI.h>
+  #include <WiFiNINA.h>
+  #define NetworkClient WiFiClient
+  #define NetworkServer WiFiServer
+#elif HARDWARE_TYPE == USING_WIFIS3
+  #include <WiFiS3.h>
+  #define NetworkClient WiFiClient  
+  #define NetworkServer WiFiServer
 #else
   #error "HARDWARE_TYPE not valid! Use USING_WIFI, USING_WIFININA or USING_ETHERNET"
 #endif
 
 #if (HARDWARE_TYPE == USING_WIFI) || (HARDWARE_TYPE == USING_WIFININA)
-// #include "wifimanager/WiFiManager.h"
+  #include "wifimanager/WiFiManager.h"
 #endif
+
+#include "HTTP_Method.h"
+#include "HTTPUri.h"
+#include "Logging.h"
+#include "websocket/WebSocketsServer.h"
 
 
 
@@ -80,6 +76,11 @@ class RequestHandler;
 #ifndef FPSTR
 #define FPSTR(p) (p)
 #endif
+
+// Forward declarations
+class Middleware;
+class MiddlewareChain;
+class RequestHandler;
 
 enum HTTPUploadStatus {
   UPLOAD_FILE_START,
