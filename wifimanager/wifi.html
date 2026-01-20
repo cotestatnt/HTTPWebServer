@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Manager</title>
+
+    <!-- https://www.toptal.com/developers/cssminifier -->
+    <style>
+    nav {
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: #0066cc94
+    }
+    nav .container{
+        display:flex;
+        justify-content:space-between;
+        align-items:center
+    }
+    nav a{
+        color:#fff;
+    }
+    .btn, a{
+        text-decoration:none
+    }
+    form,table{
+        margin:20px 0
+    }
+    .btn,.tab{
+        cursor:pointer
+    }
+    .tab-content.active,label{
+        display:block
+    }
+    :root{
+        --primary-color:#06c;
+        --primary-dark:#004c99;
+        --danger-color:#c00;
+        --success-color:#28a745;
+        --warning-color:#ffc107;
+        --light-bg:#f5f5f5;
+        --border-color:#ddd;
+        --text-color:#333
+    }
+    *{
+        box-sizing:border-box;
+        margin:0;
+    }
+    body{
+        font-family:Arial,sans-serif;
+        background:var(--light-bg);
+        color:var(--text-color);
+        line-height:1.6;
+        box-sizing:border-box;
+        margin:0;
+    }
+    .page-title {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+    }
+    .page-container{
+        max-width:760px;
+        margin:50px auto;
+        padding:20px;
+        background: #155724;
+        border-radius:10px;
+        box-shadow:0 4px 8px rgba(0,0,0,.1)
+    }
+    .btn{
+        background:var(--primary-color);
+        color:#fff
+    }
+    h1,h2,h3{
+        margin-bottom:15px;
+        margin-right: 20px;
+    }
+    h1{
+        color:#fff
+    }
+    
+    .btn{
+        display:inline-block;
+        padding:10px 15px;
+        border-radius:4px;
+        margin:10px 10px 10px 0;
+        border:none;
+        font-size:14px
+    }
+    .btn:hover{
+        background:var(--primary-dark)
+    }
+    .btn-danger,.signal-weak{
+        background:var(--danger-color)
+    }
+    .btn-danger:hover{
+        background:#a00
+    }
+    table{
+        width:100%;
+        border-collapse:collapse
+    }
+    table,td,th{
+        border:1px solid var(--border-color)
+    }
+    td,th{
+        padding:10px;
+        text-align:left
+    }
+    th{
+        background:#f2f2f2
+    }
+    label{
+        margin:10px 0 5px
+    }
+    input[type=password],input[type=text]{
+        width:100%;
+        padding:8px;
+        margin-bottom:10px;
+        border:1px solid var(--border-color);
+        border-radius:4px
+    }
+    .static-ip{
+        margin-top:15px;
+        padding:15px;
+        background:#f9f9f9;
+        border:1px solid var(--border-color);
+        border-radius:4px
+    }
+    .signal-excellent,.signal-good{
+        background:var(--success-color)
+    }
+    .signal-strength{
+        display:inline-block;
+        width:25px;
+        height:15px;
+        margin-right:5px;
+        vertical-align:middle
+    }
+    .checkbox-container input,.spinner{
+        margin-right:10px
+    }
+    .signal-good{
+        opacity:.7
+    }
+    .signal-fair{
+        background:var(--warning-color)
+    }
+    .panel{
+        background:#fff;
+        border-radius:5px;
+        padding:20px;
+        box-shadow:0 1px 3px rgba(0,0,0,.1)
+    }
+    .status{
+        padding:10px;
+        background:#f9f9f9;
+        border-radius:4px;
+        margin-bottom:15px
+    }
+    .hidden,.tab-content{
+        display:none
+    }
+    .tabs{
+        display:flex;
+        border-bottom:1px solid var(--border-color);
+        margin-bottom:20px
+    }
+    .tab{
+        padding:10px 15px
+    }
+    .tab.active{
+        border-bottom:2px solid var(--primary-color);
+        font-weight:700
+    }
+    .spinner{
+        display:inline-block;
+        width:20px;
+        height:20px;
+        border:3px solid rgba(0,0,0,.1);
+        border-radius:50%;
+        border-top-color:var(--primary-color);
+        animation:1s linear infinite spin
+    }
+    @keyframes spin{
+        to{
+            transform:rotate(360deg)
+        }
+    }
+    .message{
+        padding:10px;
+        border-radius:4px;
+        margin:10px 0
+    }
+    .message.error{
+        background-color:#f8d7da;
+        color:#721c24;
+        border:1px solid #f5c6cb
+    }
+    .message.success{
+        background-color:#d4edda;
+        color:#155724;
+        border:1px solid #c3e6cb
+    }
+    .checkbox-container{
+        display:flex;
+        align-items:center;
+        margin:10px 0
+    }
+    </style>
+</head>
+<body>
+
+    <!-- https://codebeautify.org/minify-html -->
+    <div class="page-container">
+        <nav>            
+            <div class="page-title">
+                <h1><a href="https://github.com/cotestatnt/HTTPWebServer">HTTP Web Server</a></h1>
+                <h1>WiFi Manager</h1>
+            </div>                            
+        </nav>
+
+        <div class="container">
+            <div id="message-container"></div>
+
+            <!-- Tab: Home -->
+            <div id="tab-home" class="tab-content active">
+                <div class="panel">
+                    <h2>Configure WiFi Network</h2>
+                    <div id="connection-status" class="status">
+                        <!-- Connection status inserted dynamically -->
+                    </div>
+                    <button id="btn-info" class="btn">Show details</button>
+
+                    <button id="btn-scan" class="btn">Scan Networks</button>
+
+                    <form id="wifi-form">
+                        <h3>Manual Connection</h3>
+                        <label for="ssid">SSID:</label>
+                        <input type="text" id="ssid" name="ssid" required>
+
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password">
+
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="use-static" name="useStatic">
+                            <label for="use-static">Use Static IP</label>
+                        </div>
+
+                        <div id="static-ip-fields" class="static-ip hidden">
+                            <label for="ip">IP Address:</label>
+                            <input type="text" id="ip" name="ip" placeholder="192.168.1.100">
+
+                            <label for="gateway">Gateway:</label>
+                            <input type="text" id="gateway" name="gateway" placeholder="192.168.1.1">
+
+                            <label for="subnet">Subnet Mask:</label>
+                            <input type="text" id="subnet" name="subnet" placeholder="255.255.255.0">
+
+                            <label for="dns1">Primary DNS (optional):</label>
+                            <input type="text" id="dns1" name="dns1" placeholder="8.8.8.8">
+
+                            <label for="dns2">Secondary DNS (optional):</label>
+                            <input type="text" id="dns2" name="dns2" placeholder="8.8.4.4">
+                        </div>
+
+                        <button type="submit" class="btn">Save and Connect</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab: Scan -->
+            <div id="tab-scan" class="tab-content">
+                <div class="panel">
+                    <h2>Available WiFi Networks</h2>
+                    <div id="scan-status">
+                        <div class="spinner"></div> Scanning...
+                    </div>
+                    <div id="networks-list">
+                        <!-- Networks list inserted by JS -->
+                    </div>                    
+                    <button id="btn-back-home" class="btn">Back</button>
+                </div>
+            </div>
+
+            <!-- Tab: Info -->
+            <div id="tab-info" class="tab-content">
+                <div class="panel">
+                    <h2>Connection Information</h2>
+                    <div id="info-content">
+                        <!-- Connection info inserted by JS -->
+                    </div>
+                    <button id="btn-back-home2" class="btn">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- https://minify-js.com/ -->
+    <script>
+        // Model: Application state and data
+        const wifiManager = {
+            connected: false,
+            connectionInfo: {
+                ssid: '',
+                bssid: '',
+                rssi: 0,
+                ip: '',
+                subnet: '',
+                gateway: '',
+                dns: '',
+                mac: ''
+            },
+            networks: [],
+            scanning: false,
+
+            // Function to load connection status
+            async fetchConnectionStatus() {
+                try {
+                    const response = await makeApiCall('/wifi/info');
+                    this.connectionInfo = response.info;
+                    this.connected = response.connected;
+                    return response;
+                } catch (error) {
+                    showMessage('Error loading status', 'error');
+                    console.error('Error fetching connection status:', error);
+                    return { connected: false };
+                }
+            },
+
+            // Function to scan available networks
+            async scanNetworks() {
+                this.scanning = true;
+                view.updateScanUI();
+
+                try {
+                    const response = await makeApiCall('/wifi/scan');
+                    this.networks = response.networks;
+                    this.scanning = false;
+                    return response.networks;
+                } catch (error) {
+                    showMessage('Error during scan', 'error');
+                    console.error('Error scanning networks:', error);
+                    this.scanning = false;
+                    return [];
+                } finally {
+                    view.updateScanUI();
+                }
+            },
+
+            // Function to save WiFi settings
+            async saveWiFiSettings(formData) {
+                try {
+                    const response = await makeApiCall('/wifi/save', 'POST', formData, 'application/x-www-form-urlencoded');
+                    if (response.connected) {
+                        this.connected = true;
+                        this.connectionInfo = response.info;
+                        showMessage('Connection established successfully', 'success');
+                        return true;
+                    } else {
+                        showMessage('Unable to connect to network. Verify SSID and password.', 'error');
+                        return false;
+                    }
+                } catch (error) {
+                    showMessage('An error occurred while saving settings', 'error');
+                    console.error('Error saving WiFi settings:', error);
+                    return false;
+                }
+            }
+        };
+
+        // View: User interface management
+        const view = {
+            // Initialize user interface
+            init() {
+                this.setupEventListeners();
+                this.updateConnectionStatus();
+                this.updateInfoTab();
+            },
+
+            // Set up event listeners
+            setupEventListeners() {
+
+                // Static IP checkbox
+                document.getElementById('use-static').addEventListener('change', (e) => {
+                    document.getElementById('static-ip-fields').classList.toggle('hidden', !e.target.checked);
+                });
+
+                // Buttons
+                document.getElementById('btn-scan').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    this.showTab('scan');
+                    await controller.scanNetworks();
+                });
+
+                document.getElementById('btn-info').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    this.showTab('info');
+                });
+
+                document.getElementById('btn-back-home').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showTab('home');
+                });
+
+                document.getElementById('btn-back-home2').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showTab('home');
+                });
+
+                // Form submit
+                document.getElementById('wifi-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await controller.saveWiFiSettings();
+                });  
+            },
+
+            // Update connection status in UI
+            updateConnectionStatus() {
+                const statusContainer = document.getElementById('connection-status');
+                let status = wifiManager.connected ? "Connected" : "Not connected";
+                statusContainer.innerHTML = `
+                    <p>Status: <strong>${status}</strong></p>
+                    <p>SSID: <strong>${wifiManager.connectionInfo.ssid}</strong></p>
+                    <p>IP Address: <strong>${wifiManager.connectionInfo.ip}</strong></p>
+                `;
+            },
+
+            // Update scan interface
+            updateScanUI() {
+                const scanStatus = document.getElementById('scan-status');
+                const networksList = document.getElementById('networks-list');
+
+                if (wifiManager.scanning) {
+                    scanStatus.innerHTML = '<div class="spinner"></div> Scanning...';
+                    scanStatus.style.display = 'block';
+                    networksList.style.display = 'none';
+                } else {
+                    scanStatus.style.display = 'none';
+                    networksList.style.display = 'block';
+
+                    if (wifiManager.networks.length === 0) {
+                        networksList.innerHTML = '<p>No networks found.</p>';
+                    } else {
+                        let tableHtml = `
+                            <table>
+                                <tr>
+                                    <th>SSID</th>
+                                    <th>Signal</th>
+                                    <th>Security</th>
+                                    <th>Channel</th>
+                                    <th>Action</th>
+                                </tr>
+                        `;
+
+                        wifiManager.networks.forEach(network => {
+                            // Determine signal class
+                            let signalClass;
+                            if (network.rssi >= -50) {
+                                signalClass = 'signal-excellent';
+                            } else if (network.rssi >= -65) {
+                                signalClass = 'signal-good';
+                            } else if (network.rssi >= -75) {
+                                signalClass = 'signal-fair';
+                            } else {
+                                signalClass = 'signal-weak';
+                            }
+
+                            tableHtml += `
+                                <tr>
+                                    <td>${network.ssid}</td>
+                                    <td>
+                                        <div class="signal-strength ${signalClass}"></div>
+                                        ${network.rssi} dBm
+                                    </td>
+                                    <td>${network.encryption}</td>
+                                    <td>${network.channel}</td>
+                                    <td>
+                                        <button class="btn" onclick="controller.selectNetwork('${network.ssid}')">Select</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                        tableHtml += '</table>';
+                        networksList.innerHTML = tableHtml;
+                    }
+                }
+            },
+
+            // Update info tab
+            updateInfoTab() {
+                const infoContent = document.getElementById('info-content');
+                let status = wifiManager.connected ? "Connected" : "Not connected";
+                infoContent.innerHTML = `
+                    <table>
+                        <tr><td>Status:</td><td>${status}</td></tr>
+                        <tr><td>SSID:</td><td>${wifiManager.connectionInfo.ssid}</td></tr>
+                        <tr><td>RSSI:</td><td>${wifiManager.connectionInfo.rssi} dBm</td></tr>
+                        <tr><td>IP:</td><td>${wifiManager.connectionInfo.ip}</td></tr>
+                        <tr><td>Subnet Mask:</td><td>${wifiManager.connectionInfo.subnet}</td></tr>
+                        <tr><td>Gateway:</td><td>${wifiManager.connectionInfo.gateway}</td></tr>
+                        <tr><td>DNS:</td><td>${wifiManager.connectionInfo.dns}</td></tr>
+                    </table>
+                `;
+            },
+
+            // Show specific tab
+            showTab(tabId) {
+                // Update tab links
+                document.querySelectorAll('.tab-link').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('data-tab') === tabId);
+                });
+
+                // Update tab contents
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.toggle('active', tab.id === `tab-${tabId}`);
+                });
+            }
+        };
+
+        // Controller: Application logic
+        const controller = {
+            // Initialize application
+            async init() {
+                await wifiManager.fetchConnectionStatus();
+                view.init();
+            },
+
+            // Scan available networks
+            async scanNetworks() {
+                await wifiManager.scanNetworks();
+            },
+
+            // Save WiFi settings
+            async saveWiFiSettings() {
+                const form = document.getElementById('wifi-form');
+                const formData = new URLSearchParams();
+                formData.append('ssid', form.querySelector('#ssid').value.trim());
+                formData.append('password', form.querySelector('#password').value.trim());
+                formData.append('useStatic', form.querySelector('#use-static').checked ? '1' : '0');
+                formData.append('ip', form.querySelector('#ip').value.trim());
+                formData.append('gateway', form.querySelector('#gateway').value.trim());
+                formData.append('subnet', form.querySelector('#subnet').value.trim());
+                formData.append('dns1', form.querySelector('#dns1').value.trim());
+                formData.append('dns2', form.querySelector('#dns2').value.trim());
+
+                // SSID validation
+                if (!formData.get('ssid')) {
+                    showMessage('SSID cannot be empty', 'error');
+                    return;
+                }
+
+                if (formData.get('useStatic') === '1') {
+                    // IP fields validation
+                    if (!isValidIPv4(formData.get('ip')) || !isValidIPv4(formData.get('gateway')) || !isValidIPv4(formData.get('subnet'))) {
+                        showMessage('Invalid IP address, Gateway or Subnet', 'error');
+                        return;
+                    }
+                    // DNS are optional but must be valid if provided
+                    if (formData.get('dns1') && !isValidIPv4(formData.get('dns1'))) {
+                        showMessage('Invalid DNS1', 'error');
+                        return;
+                    }
+                    if (formData.get('dns2') && !isValidIPv4(formData.get('dns2'))) {
+                        showMessage('Invalid DNS2', 'error');
+                        return;
+                    }
+                }
+
+                await wifiManager.saveWiFiSettings(formData.toString());
+            },
+
+            // Select network from list
+            selectNetwork(ssid) {
+                view.showTab('home');
+                document.getElementById('ssid').value = ssid;
+                document.getElementById("password").focus();
+            }
+            
+        };
+
+        // Show message to user
+        function showMessage(message, type = 'success') {
+            const container = document.getElementById('message-container');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${type}`;
+            messageElement.textContent = message;
+
+            container.innerHTML = '';
+            container.appendChild(messageElement);
+
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                messageElement.remove();
+            }, 5000);
+        }
+
+        // Validate IPv4 address
+        function isValidIPv4(ip) {
+            if (!ip) return false;
+
+            const pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            return pattern.test(ip);
+        }
+
+        // Fetch endpoint implementation
+        async function makeApiCall(endpoint, method = 'GET', data = null, type = 'application/json') {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': type
+                },
+                mode: 'cors',
+                credentials: 'same-origin' 
+            };
+
+            if (data && (method === 'POST' || method === 'PUT')) {
+                if (type === 'application/json') {
+                    options.body = JSON.stringify(data);
+                } else if (type === 'application/x-www-form-urlencoded') {
+                    options.body = data;
+                }
+            }
+
+            try {
+                const response = await fetch(`${endpoint}`, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
+
+        // Start application
+        controller.init();
+    </script>
+</body>
+</html>
