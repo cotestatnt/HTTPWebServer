@@ -15,20 +15,37 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
 
-#ifndef HEXBuilder_h
-#define HEXBuilder_h
+  Modified 10 Jan 2024 by Lucas Saavedra Vaz (Use abstract class HashBuilder)
+*/
+#ifndef HTTPMD5Builder_h
+#define HTTPMD5Builder_h
 
 #include <WString.h>
 #include <Stream.h>
 
-class HEXBuilder {
-public:
-  static size_t hex2bytes(unsigned char *out, size_t maxlen, String &in);
-  static size_t hex2bytes(unsigned char *out, size_t maxlen, const char *in);
+#include "MD5Hash.h"
+#include "HashBuilder.h"
 
-  static String bytes2hex(const unsigned char *in, size_t len);
-  static size_t bytes2hex(char *out, size_t maxlen, const unsigned char *in, size_t len);
+class HTTPMD5Builder : public HashBuilder {
+private:
+  md5_context_t _ctx;
+  uint8_t _buf[ESP_ROM_MD5_DIGEST_LEN];
+
+public:
+  void begin(void) override;
+
+  using HashBuilder::add;
+  void add(const uint8_t *data, size_t len) override;
+
+  using HashBuilder::addHexString;
+  void addHexString(const char *data) override;
+
+  bool addStream(Stream &stream, const size_t maxLen) override;
+  void calculate(void) override;
+  void getBytes(uint8_t *output) override;
+  void getChars(char *output) override;
+  String toString(void) override;
 };
+
 #endif

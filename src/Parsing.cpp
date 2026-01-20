@@ -25,7 +25,7 @@
 // #include "NetworkClient.h"
 
 
-#include "WebServer.h"
+#include "HTTPWebServer.h"
 #include "utils/mimetable.h"
 #include "Logging.h"
 #include "NetworkConfig.h"
@@ -77,7 +77,7 @@ static char *readBytesWithTimeout(NetworkClient &client, size_t maxLength, size_
   return buf;
 }
 
-bool WebServer::_parseRequest(NetworkClient &client) {
+bool HTTPWebServer::_parseRequest(NetworkClient &client) {
   // Read the first line of HTTP request
   String req = client.readStringUntil('\r');
   client.readStringUntil('\n');
@@ -273,7 +273,7 @@ bool WebServer::_parseRequest(NetworkClient &client) {
   return true;
 }
 
-bool WebServer::_collectHeader(const char *headerName, const char *headerValue) {
+bool HTTPWebServer::_collectHeader(const char *headerName, const char *headerValue) {
   RequestArgument *last = nullptr;
   for (RequestArgument *header = _currentHeaders; header; header = header->next) {
     if (header->next == nullptr) {
@@ -300,7 +300,7 @@ bool WebServer::_collectHeader(const char *headerName, const char *headerValue) 
   return false;
 }
 
-void WebServer::_parseArguments(const String &data) {
+void HTTPWebServer::_parseArguments(const String &data) {
   log_debug("args: %s", data.c_str());
   if (_currentArgs) {
     delete[] _currentArgs;
@@ -352,7 +352,7 @@ void WebServer::_parseArguments(const String &data) {
   log_debug("args count: %d", _currentArgCount);
 }
 
-void WebServer::_uploadWriteByte(uint8_t b) {
+void HTTPWebServer::_uploadWriteByte(uint8_t b) {
   if (_currentUpload->currentSize == HTTP_UPLOAD_BUFLEN) {
     if (_currentHandler && _currentHandler->canUpload(*this, _currentUri)) {
       _currentHandler->upload(*this, _currentUri, *_currentUpload);
@@ -363,7 +363,7 @@ void WebServer::_uploadWriteByte(uint8_t b) {
   _currentUpload->buf[_currentUpload->currentSize++] = b;
 }
 
-int WebServer::_uploadReadByte(NetworkClient &client) {
+int HTTPWebServer::_uploadReadByte(NetworkClient &client) {
   int res = client.read();
 
   if (res < 0) {
@@ -412,7 +412,7 @@ int WebServer::_uploadReadByte(NetworkClient &client) {
   return res;
 }
 
-bool WebServer::_parseForm(NetworkClient &client, const String &boundary, uint32_t len) {
+bool HTTPWebServer::_parseForm(NetworkClient &client, const String &boundary, uint32_t len) {
   (void)len;
   log_debug("Parse Form: Boundary: %s Length: %u", boundary.c_str(), len);
   String line;
@@ -595,7 +595,7 @@ bool WebServer::_parseForm(NetworkClient &client, const String &boundary, uint32
   return false;
 }
 
-String WebServer::urlDecode(const String &text) {
+String HTTPWebServer::urlDecode(const String &text) {
   String decoded = "";
   char temp[] = "0x00";
   unsigned int len = text.length();
@@ -620,7 +620,7 @@ String WebServer::urlDecode(const String &text) {
   return decoded;
 }
 
-bool WebServer::_parseFormUploadAborted() {
+bool HTTPWebServer::_parseFormUploadAborted() {
   _currentUpload->status = UPLOAD_FILE_ABORTED;
   if (_currentHandler && _currentHandler->canUpload(*this, _currentUri)) {
     _currentHandler->upload(*this, _currentUri, *_currentUpload);

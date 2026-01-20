@@ -55,7 +55,7 @@ bool MiddlewareChain::removeMiddleware(Middleware *middleware) {
   return false;
 }
 
-bool MiddlewareChain::runChain(WebServer &server, Middleware::Callback finalizer) {
+bool MiddlewareChain::runChain(HTTPWebServer &server, Middleware::Callback finalizer) {
   if (!_root) {
     return finalizer();
   }

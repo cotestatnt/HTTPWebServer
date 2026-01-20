@@ -2,13 +2,13 @@
 #define REQUESTHANDLERSIMPL_H
 
 #include "WString.h"
-#include "Uri.h"
+#include "HTTPUri.h"
 #include "HTTP_Method.h"
-#include "WebServer.h"
+#include "HTTPWebServer.h"
 
 #include "RequestHandler.h"
 #include "utils/mimetable.h"
-#include "crypt/MD5Builder.h"
+#include "crypt/HTTPMD5Builder.h"
 #include "libb64/base64.h"
 
 using namespace mime;
@@ -36,7 +36,7 @@ RequestHandler &RequestHandler::removeMiddleware(Middleware *middleware) {
   return *this;
 }
 
-bool RequestHandler::process(WebServer &server, HTTPMethod requestMethod, String requestUri) {
+bool RequestHandler::process(HTTPWebServer &server, HTTPMethod requestMethod, String requestUri) {
   if (_chain) {
     return _chain->runChain(server, [this, &server, &requestMethod, &requestUri]() {
       return handle(server, requestMethod, requestUri);
@@ -48,10 +48,7 @@ bool RequestHandler::process(WebServer &server, HTTPMethod requestMethod, String
 
 class FunctionRequestHandler : public RequestHandler {
 public:
-  FunctionRequestHandler(WebServer::THandlerFunction fn, WebServer::THandlerFunction ufn, const Uri &uri, HTTPMethod method)
-    : _fn(fn), _ufn(ufn), _uri(uri.clone()), _method(method) {
-    _uri->initPathArgs(pathArgs);
-  }
+    FunctionRequestHandler(HTTPWebServer::THandlerFunction fn, HTTPWebServer::THandlerFunction ufn, const HTTPUri &uri, HTTPMethod method) : _fn(fn), _ufn(ufn), _uri(uri.clone()), _method(method) {}
 
   ~FunctionRequestHandler() {
     delete _uri;
@@ -82,7 +79,7 @@ public:
     return true;
   }
 
-  bool canHandle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
+  bool canHandle(HTTPWebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
     if (_method != HTTP_ANY && _method != requestMethod) {
       return false;
     }
@@ -90,7 +87,7 @@ public:
     return _uri->canHandle(requestUri, pathArgs) && (_filter != NULL ? _filter(server) : true);
   }
 
-  bool canUpload(WebServer &server, const String &requestUri) override {
+  bool canUpload(HTTPWebServer &server, const String &requestUri) override {
     if (!_ufn || !canHandle(server, HTTP_POST, requestUri)) {
       return false;
     }
@@ -98,7 +95,7 @@ public:
     return true;
   }
 
-  bool canRaw(WebServer &server, const String &requestUri) override {
+  bool canRaw(HTTPWebServer &server, const String &requestUri) override {
     (void)requestUri;
     if (!_ufn || _method == HTTP_GET || (_filter != NULL ? _filter(server) == false : false)) {
       return false;
@@ -107,7 +104,7 @@ public:
     return true;
   }
 
-  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
+  bool handle(HTTPWebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
     if (!canHandle(server, requestMethod, requestUri)) {
       return false;
     }
@@ -116,32 +113,32 @@ public:
     return true;
   }
 
-  void upload(WebServer &server, const String &requestUri, HTTPUpload &upload) override {
+  void upload(HTTPWebServer &server, const String &requestUri, HTTPUpload &upload) override {
     (void)upload;
     if (canUpload(server, requestUri)) {
       _ufn();
     }
   }
 
-  void raw(WebServer &server, const String &requestUri, HTTPRaw &raw) override {
+  void raw(HTTPWebServer &server, const String &requestUri, HTTPRaw &raw) override {
     (void)raw;
     if (canRaw(server, requestUri)) {
       _ufn();
     }
   }
 
-  FunctionRequestHandler &setFilter(WebServer::FilterFunction filter) {
+  FunctionRequestHandler &setFilter(HTTPWebServer::FilterFunction filter) {
     _filter = filter;
     return *this;
   }
 
 protected:
-  WebServer::THandlerFunction _fn;
-  WebServer::THandlerFunction _ufn;
+  HTTPWebServer::THandlerFunction _fn;
+  HTTPWebServer::THandlerFunction _ufn;
   // _filter should return 'true' when the request should be handled
   // and 'false' when the request should be ignored
-  WebServer::FilterFunction _filter;
-  Uri *_uri;
+  HTTPWebServer::FilterFunction _filter;
+  HTTPUri *_uri;
   HTTPMethod _method;
 };
 
@@ -168,7 +165,7 @@ protected:
 //     return true;
 //   }
 
-//   bool canHandle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
+//   bool canHandle(HTTPWebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
 //     if (requestMethod != HTTP_GET) {
 //       return false;
 //     }
@@ -184,7 +181,7 @@ protected:
 //     return true;
 //   }
 
-//   bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
+//   bool handle(HTTPWebServer &server, HTTPMethod requestMethod, const String &requestUri) override {
 //     if (!canHandle(server, requestMethod, requestUri)) {
 //       return false;
 //     }
@@ -271,7 +268,7 @@ protected:
 //     // calculate eTag using md5 checksum
 //     uint8_t md5_buf[16];
 //     File f = fs.open(path, "r");
-//     MD5Builder calcMD5;
+//     HTTPMD5Builder calcMD5;
 //     calcMD5.begin();
 //     calcMD5.addStream(f, f.size());
 //     calcMD5.calculate();
@@ -282,7 +279,7 @@ protected:
 //     return (result);
 //   }  // calcETag
 
-//   StaticRequestHandler &setFilter(WebServer::FilterFunction filter) {
+//   StaticRequestHandler &setFilter(HTTPWebServer::FilterFunction filter) {
 //     _filter = filter;
 //     return *this;
 //   }
@@ -290,7 +287,7 @@ protected:
 // protected:
 //   // _filter should return 'true' when the request should be handled
 //   // and 'false' when the request should be ignored
-//   WebServer::FilterFunction _filter;
+//   HTTPWebServer::FilterFunction _filter;
 //   FS _fs;
 //   String _uri;
 //   String _path;
@@ -300,3 +297,5 @@ protected:
 // };
 
 #endif  //REQUESTHANDLERSIMPL_H
+
+

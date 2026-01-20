@@ -1,16 +1,16 @@
 #ifndef URI_GLOB_H
 #define URI_GLOB_H
 
-#include "Uri.h"
+#include "../HTTPUri.h"
 #include <fnmatch.h>
 
-class UriGlob : public Uri {
+class UriGlob : public HTTPUri {
 
 public:
-  explicit UriGlob(const char *uri) : Uri(uri){};
-  explicit UriGlob(const String &uri) : Uri(uri){};
+  explicit UriGlob(const char *uri) : HTTPUri(uri){};
+  explicit UriGlob(const String &uri) : HTTPUri(uri){};
 
-  Uri *clone() const override final {
+  HTTPUri *clone() const override final {
     return new UriGlob(_uri);
   };
 

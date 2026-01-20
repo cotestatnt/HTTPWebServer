@@ -19,18 +19,18 @@
 
 #include <Arduino.h>
 #include "HEXBuilder.h"
-#include "MD5Builder.h"
+#include "HTTPMD5Builder.h"
 
-void MD5Builder::begin(void) {
+void HTTPMD5Builder::begin(void) {
   memset(_buf, 0x00, ESP_ROM_MD5_DIGEST_LEN);
   md5_init(&_ctx);
 }
 
-void MD5Builder::add(const uint8_t *data, size_t len) {
+void HTTPMD5Builder::add(const uint8_t *data, size_t len) {
   md5_update(&_ctx, data, len);
 }
 
-void MD5Builder::addHexString(const char *data) {
+void HTTPMD5Builder::addHexString(const char *data) {
   size_t len = strlen(data);
   uint8_t *tmp = (uint8_t *)malloc(len / 2);
   if (tmp == NULL) {
@@ -41,7 +41,7 @@ void MD5Builder::addHexString(const char *data) {
   free(tmp);
 }
 
-bool MD5Builder::addStream(Stream &stream, const size_t maxLen) {
+bool HTTPMD5Builder::addStream(Stream &stream, const size_t maxLen) {
   const int buf_size = 512;
   int maxLengthLeft = maxLen;
   uint8_t *buf = (uint8_t *)malloc(buf_size);
@@ -80,19 +80,19 @@ bool MD5Builder::addStream(Stream &stream, const size_t maxLen) {
   return true;
 }
 
-void MD5Builder::calculate(void) {
+void HTTPMD5Builder::calculate(void) {
   md5_final(_buf, &_ctx);
 }
 
-void MD5Builder::getBytes(uint8_t *output) {
+void HTTPMD5Builder::getBytes(uint8_t *output) {
   memcpy(output, _buf, ESP_ROM_MD5_DIGEST_LEN);
 }
 
-void MD5Builder::getChars(char *output) {
+void HTTPMD5Builder::getChars(char *output) {
   bytes2hex(output, ESP_ROM_MD5_DIGEST_LEN * 2 + 1, _buf, ESP_ROM_MD5_DIGEST_LEN);
 }
 
-String MD5Builder::toString(void) {
+String HTTPMD5Builder::toString(void) {
   char out[(ESP_ROM_MD5_DIGEST_LEN * 2) + 1];
   getChars(out);
   return String(out);

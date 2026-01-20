@@ -1,4 +1,5 @@
 #include "../Middlewares.h"
+#include "../HTTPWebServer.h"
 
 AuthenticationMiddleware &AuthenticationMiddleware::setUsername(const char *username) {
   _username = username;
@@ -20,12 +21,12 @@ AuthenticationMiddleware &AuthenticationMiddleware::setPasswordHash(const char *
   return *this;
 }
 
-AuthenticationMiddleware &AuthenticationMiddleware::setCallback(WebServer::THandlerFunctionAuthCheck fn) {
+AuthenticationMiddleware &AuthenticationMiddleware::setCallback(HTTPWebServer::THandlerFunctionAuthCheck fn) {
   assert(fn);
   _callback = fn;
   _hash = false;
-  _username = emptyString;
-  _password = emptyString;
+  _username = HTTP_EMPTY_STRING;
+  _password = HTTP_EMPTY_STRING;
   return *this;
 }
 
@@ -44,7 +45,7 @@ AuthenticationMiddleware &AuthenticationMiddleware::setAuthFailureMessage(const 
   return *this;
 }
 
-bool AuthenticationMiddleware::isAllowed(WebServer &server) const {
+bool AuthenticationMiddleware::isAllowed(HTTPWebServer &server) const {
   if (_callback) {
     return server.authenticate(_callback);
   }
@@ -60,7 +61,7 @@ bool AuthenticationMiddleware::isAllowed(WebServer &server) const {
   return true;
 }
 
-bool AuthenticationMiddleware::run(WebServer &server, Middleware::Callback next) {
+bool AuthenticationMiddleware::run(HTTPWebServer &server, Middleware::Callback next) {
   bool authenticationRequired = false;
 
   if (_callback) {

@@ -267,6 +267,8 @@ void WebSocketsClient::loop(void) {
                 _client.ssl->setCACert(_CA_cert);
 #elif defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_NANO_33_IOT)
                 // no setCACert
+#elif(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA)            
+                // no setCACert
 #else
 #error setCACert not implemented
 #endif

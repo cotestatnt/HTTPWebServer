@@ -1,7 +1,7 @@
 #include "WiFiManager.h"
 #if HARDWARE_TYPE == USING_WIFI
 
-WiFiManager::WiFiManager(WebServer& server)
+WiFiManager::WiFiManager(HTTPWebServer& server)
   : _server(server) {
 }
 
@@ -34,7 +34,7 @@ void WiFiManager::begin() {
 
 }
 void WiFiManager::handleClient() {
-  // The WebServer already handles clients, so nothing needs to be done here
+  // The HTTPWebServer already handles clients, so nothing needs to be done here
 }
 
 void WiFiManager::setDefaultCredentials(const String& ssid, const String& password) {

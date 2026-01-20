@@ -1,16 +1,16 @@
 #ifndef URI_REGEX_H
 #define URI_REGEX_H
 
-#include "Uri.h"
+#include "../HTTPUri.h"
 #include <regex>
 
-class UriRegex : public Uri {
+class UriRegex : public HTTPUri {
 
 public:
-  explicit UriRegex(const char *uri) : Uri(uri){};
-  explicit UriRegex(const String &uri) : Uri(uri){};
+  explicit UriRegex(const char *uri) : HTTPUri(uri){};
+  explicit UriRegex(const String &uri) : HTTPUri(uri){};
 
-  Uri *clone() const override final {
+  HTTPUri *clone() const override final {
     return new UriRegex(_uri);
   };
 
@@ -23,7 +23,7 @@ public:
   }
 
   bool canHandle(const String &requestUri, std::vector<String> &pathArgs) override final {
-    if (Uri::canHandle(requestUri, pathArgs)) {
+    if (HTTPUri::canHandle(requestUri, pathArgs)) {
       return true;
     }
 

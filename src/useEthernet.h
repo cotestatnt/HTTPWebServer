@@ -3,7 +3,7 @@
 #define NetworkClient EthernetClient
 #define NetworkServer EthernetServer
 
-#include "WebServer.h"
+#include "HTTPWebServer.h"
 
 
 // // #define USE_HARDWARE USING_ETHERNET

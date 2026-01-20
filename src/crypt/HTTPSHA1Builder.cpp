@@ -21,7 +21,7 @@
  */
 
 #include <Arduino.h>
-#include "SHA1Builder.h"
+#include "HTTPSHA1Builder.h"
 
 // 32-bit integer manipulation macros (big endian)
 
@@ -47,7 +47,7 @@ static const uint8_t sha1_padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 // Private methods
 
-void SHA1Builder::process(const uint8_t *data) {
+void HTTPSHA1Builder::process(const uint8_t *data) {
   uint32_t temp, W[16], A, B, C, D, E;
 
   GET_UINT32_BE(W[0], data, 0);
@@ -200,7 +200,7 @@ void SHA1Builder::process(const uint8_t *data) {
 
 // Public methods
 
-void SHA1Builder::begin(void) {
+void HTTPSHA1Builder::begin(void) {
   total[0] = 0;
   total[1] = 0;
 
@@ -214,7 +214,7 @@ void SHA1Builder::begin(void) {
   memset(hash, 0x00, sizeof(hash));
 }
 
-void SHA1Builder::add(const uint8_t *data, size_t len) {
+void HTTPSHA1Builder::add(const uint8_t *data, size_t len) {
   size_t fill;
   uint32_t left;
 
@@ -251,7 +251,7 @@ void SHA1Builder::add(const uint8_t *data, size_t len) {
   }
 }
 
-void SHA1Builder::addHexString(const char *data) {
+void HTTPSHA1Builder::addHexString(const char *data) {
   uint16_t len = strlen(data);
   uint8_t *tmp = (uint8_t *)malloc(len / 2);
   if (tmp == NULL) {
@@ -262,7 +262,7 @@ void SHA1Builder::addHexString(const char *data) {
   free(tmp);
 }
 
-bool SHA1Builder::addStream(Stream &stream, const size_t maxLen) {
+bool HTTPSHA1Builder::addStream(Stream &stream, const size_t maxLen) {
   const int buf_size = 512;
   int maxLengthLeft = maxLen;
   uint8_t *buf = (uint8_t *)malloc(buf_size);
@@ -301,7 +301,7 @@ bool SHA1Builder::addStream(Stream &stream, const size_t maxLen) {
   return true;
 }
 
-void SHA1Builder::calculate(void) {
+void HTTPSHA1Builder::calculate(void) {
   uint32_t last, padn;
   uint32_t high, low;
   uint8_t msglen[8];
@@ -325,15 +325,15 @@ void SHA1Builder::calculate(void) {
   PUT_UINT32_BE(state[4], hash, 16);
 }
 
-void SHA1Builder::getBytes(uint8_t *output) {
+void HTTPSHA1Builder::getBytes(uint8_t *output) {
   memcpy(output, hash, SHA1_HASH_SIZE);
 }
 
-void SHA1Builder::getChars(char *output) {
+void HTTPSHA1Builder::getChars(char *output) {
   bytes2hex(output, SHA1_HASH_SIZE * 2 + 1, hash, SHA1_HASH_SIZE);
 }
 
-String SHA1Builder::toString(void) {
+String HTTPSHA1Builder::toString(void) {
   char out[(SHA1_HASH_SIZE * 2) + 1];
   getChars(out);
   return String(out);

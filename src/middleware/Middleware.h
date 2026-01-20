@@ -5,16 +5,16 @@
 #include <functional>
 
 class MiddlewareChain;
-class WebServer;
+class HTTPWebServer;
 
 class Middleware {
 public:
   typedef std::function<bool(void)> Callback;
-  typedef std::function<bool(WebServer &server, Callback next)> Function;
+  typedef std::function<bool(HTTPWebServer &server, Callback next)> Function;
 
   virtual ~Middleware() {}
 
-  virtual bool run(WebServer &server, Callback next) {
+  virtual bool run(HTTPWebServer &server, Callback next) {
     (void)server;
     return next();
   };
@@ -29,7 +29,7 @@ class MiddlewareFunction : public Middleware {
 public:
   explicit MiddlewareFunction(const Middleware::Function& fn) : _fn(fn) {}
 
-  bool run(WebServer &server, Middleware::Callback next) override {
+  bool run(HTTPWebServer &server, Middleware::Callback next) override {
     return _fn(server, next);
   }
 
@@ -45,7 +45,7 @@ public:
   void addMiddleware(Middleware *middleware);
   bool removeMiddleware(Middleware *middleware);
 
-  bool runChain(WebServer &server, Middleware::Callback finalizer);
+  bool runChain(HTTPWebServer &server, Middleware::Callback finalizer);
 
 private:
   Middleware *_root = nullptr;

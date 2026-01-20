@@ -1,4 +1,5 @@
 #include "../Middlewares.h"
+#include "../HTTPWebServer.h"
 
 CorsMiddleware &CorsMiddleware::setOrigin(const char *origin) {
   _origin = origin;
@@ -25,7 +26,7 @@ CorsMiddleware &CorsMiddleware::setMaxAge(uint32_t seconds) {
   return *this;
 }
 
-void CorsMiddleware::addCORSHeaders(WebServer &server) {
+void CorsMiddleware::addCORSHeaders(HTTPWebServer &server) {
   server.sendHeader(F("Access-Control-Allow-Origin"), _origin.c_str());
   server.sendHeader(F("Access-Control-Allow-Methods"), _methods.c_str());
   server.sendHeader(F("Access-Control-Allow-Headers"), _headers.c_str());
@@ -33,7 +34,7 @@ void CorsMiddleware::addCORSHeaders(WebServer &server) {
   server.sendHeader(F("Access-Control-Max-Age"), String(_maxAge).c_str());
 }
 
-bool CorsMiddleware::run(WebServer &server, Middleware::Callback next) {
+bool CorsMiddleware::run(HTTPWebServer &server, Middleware::Callback next) {
   // Origin header ? => CORS handling
   if (server.hasHeader(F("Origin"))) {
     addCORSHeaders(server);

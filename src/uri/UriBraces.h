@@ -1,15 +1,15 @@
 #ifndef URI_BRACES_H
 #define URI_BRACES_H
 
-#include "Uri.h"
+#include "../HTTPUri.h"
 
-class UriBraces : public Uri {
+class UriBraces : public HTTPUri {
 
 public:
-  explicit UriBraces(const char *uri) : Uri(uri){};
-  explicit UriBraces(const String &uri) : Uri(uri){};
+  explicit UriBraces(const char *uri) : HTTPUri(uri){};
+  explicit UriBraces(const String &uri) : HTTPUri(uri){};
 
-  Uri *clone() const override final {
+  HTTPUri *clone() const override final {
     return new UriBraces(_uri);
   };
 
@@ -26,7 +26,7 @@ public:
   }
 
   bool canHandle(const String &requestUri, std::vector<String> &pathArgs) override final {
-    if (Uri::canHandle(requestUri, pathArgs)) {
+    if (HTTPUri::canHandle(requestUri, pathArgs)) {
       return true;
     }
 

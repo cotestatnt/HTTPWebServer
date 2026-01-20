@@ -18,9 +18,9 @@ extern "C"
 #define LOG_LEVEL       0
 
 
-#define __FILE_NAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 #define PRINT_TIME() DEBUG_PORT.print(millis());
-#define PRINT_FILE_LINE() {PRINT_TIME() DEBUG_PORT.print(" [");DEBUG_PORT.print(__FILE_NAME__); \
+#define PRINT_FILE_LINE() {PRINT_TIME() DEBUG_PORT.print(" [");DEBUG_PORT.print(__FILENAME__); \
     DEBUG_PORT.print(":");DEBUG_PORT.print(__LINE__);DEBUG_PORT.print(" "); DEBUG_PORT.print(__FUNCTION__); DEBUG_PORT.print("()]\t");}
 
 

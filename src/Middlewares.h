@@ -1,7 +1,8 @@
 #ifndef MIDDLEWARES_H
 #define MIDDLEWARES_H
 
-#include "WebServer.h"
+#include "HTTPWebServer.h"
+#include "middleware/Middleware.h"
 #include "WString.h"
 #include <Stream.h>
 #include <assert.h>
@@ -11,7 +12,7 @@ class LoggingMiddleware : public Middleware {
 public:
   void setOutput(Print &output);
 
-  bool run(WebServer &server, Middleware::Callback next) override;
+  bool run(HTTPWebServer &server, Middleware::Callback next) override;
 
 private:
   Print *_out = nullptr;
@@ -25,9 +26,9 @@ public:
   CorsMiddleware &setAllowCredentials(bool credentials);
   CorsMiddleware &setMaxAge(uint32_t seconds);
 
-  void addCORSHeaders(WebServer &server);
+  void addCORSHeaders(HTTPWebServer &server);
 
-  bool run(WebServer &server, Middleware::Callback next) override;
+  bool run(HTTPWebServer &server, Middleware::Callback next) override;
 
 private:
   String _origin = F("*");
@@ -42,21 +43,21 @@ public:
   AuthenticationMiddleware &setUsername(const char *username);
   AuthenticationMiddleware &setPassword(const char *password);
   AuthenticationMiddleware &setPasswordHash(const char *sha1AsBase64orHex);
-  AuthenticationMiddleware &setCallback(WebServer::THandlerFunctionAuthCheck fn);
+  AuthenticationMiddleware &setCallback(HTTPWebServer::THandlerFunctionAuthCheck fn);
 
   AuthenticationMiddleware &setRealm(const char *realm);
   AuthenticationMiddleware &setAuthMethod(HTTPAuthMethod method);
   AuthenticationMiddleware &setAuthFailureMessage(const char *message);
 
-  bool isAllowed(WebServer &server) const;
+  bool isAllowed(HTTPWebServer &server) const;
 
-  bool run(WebServer &server, Middleware::Callback next) override;
+  bool run(HTTPWebServer &server, Middleware::Callback next) override;
 
 private:
   String _username;
   String _password;
   bool _hash = false;
-  WebServer::THandlerFunctionAuthCheck _callback;
+  HTTPWebServer::THandlerFunctionAuthCheck _callback;
 
   const char *_realm = nullptr;
   HTTPAuthMethod _method = BASIC_AUTH;

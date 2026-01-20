@@ -8,7 +8,7 @@
 #include <Arduino.h>
 #include <vector>
 
-#include "WebServer.h"
+#include "HTTPWebServer.h"
 #include "wifi_min_html.h"
 
 #ifndef WIFI_MODE_STA
@@ -39,7 +39,7 @@ void callBeginIfExists(T &obj, const char *ssid, const char *passphrase, uint8_t
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
-class WebServer;
+class HTTPWebServer;
 
 struct NetworkInfo
 {
@@ -73,14 +73,14 @@ typedef struct {
 
 class WiFiManager
 {
-  friend class WebServer;
+  friend class HTTPWebServer;
 
 public:
   /**
    * @brief Constructs a WiFiManager object.
-   * @param server Reference to the WebServer instance used for handling HTTP requests.
+   * @param server Reference to the HTTPWebServer instance used for handling HTTP requests.
    */
-  explicit WiFiManager(WebServer &server);
+  explicit WiFiManager(HTTPWebServer &server);
   /**
    * @brief Destructor for the WiFiManager class.
    */
@@ -129,7 +129,7 @@ public:
   
 
 private:
-  WebServer &_server;
+  HTTPWebServer &_server;
   // String _defaultSSID;
   // String _defaultPassword;
 

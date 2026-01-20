@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SHA1Builder_h
-#define SHA1Builder_h
+#ifndef HTTPSHA1Builder_h
+#define HTTPSHA1Builder_h
 
 #include <WString.h>
 #include <Stream.h>
@@ -22,7 +22,7 @@
 
 #define SHA1_HASH_SIZE 20
 
-class SHA1Builder : public HashBuilder {
+class HTTPSHA1Builder : public HashBuilder {
 private:
   uint32_t total[2];            /* number of bytes processed  */
   uint32_t state[5];            /* intermediate digest state  */

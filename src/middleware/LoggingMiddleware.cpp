@@ -1,10 +1,11 @@
 #include "../Middlewares.h"
+#include "../HTTPWebServer.h"
 
 void LoggingMiddleware::setOutput(Print &output) {
   _out = &output;
 }
 
-bool LoggingMiddleware::run(WebServer &server, Middleware::Callback next) {
+bool LoggingMiddleware::run(HTTPWebServer &server, Middleware::Callback next) {
   if (_out == nullptr) {
     return next();
   }
@@ -55,7 +56,7 @@ bool LoggingMiddleware::run(WebServer &server, Middleware::Callback next) {
     _out->print(F(" "));
     _out->print(server.responseCode());
     _out->print(F(" "));
-    _out->println(WebServer::responseCodeToString(server.responseCode()));
+    _out->println(HTTPWebServer::responseCodeToString(server.responseCode()));
 
     n = server.responseHeaders();
     for (int i = 0; i < n; i++) {

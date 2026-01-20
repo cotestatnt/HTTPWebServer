@@ -27,10 +27,12 @@
 #include "utils/random.h"
 
 #include "RequestHandlersImpl.h"
-#include "crypt/MD5Builder.h"
-#include "crypt/SHA1Builder.h"
+#include "crypt/HTTPMD5Builder.h"
+#include "crypt/HTTPSHA1Builder.h"
 
 #include "HTTPWebServer.h"
+
+const String HTTP_EMPTY_STRING = "";
 
 static const char AUTHORIZATION_HEADER[] = "Authorization";
 static const char qop_auth[] PROGMEM = "qop=auth";
@@ -74,7 +76,7 @@ String HTTPWebServer::_extractParam(String &authReq, const String &param, const 
 }
 
 static String md5str(String &in) {
-  MD5Builder md5 = MD5Builder();
+  HTTPMD5Builder md5 = HTTPMD5Builder();
   md5.begin();
   md5.add(in);
   md5.calculate();
@@ -100,7 +102,7 @@ bool HTTPWebServer::authenticateBasicSHA1(const char *_username, const char *_sh
     uint8_t sha1[20];
     char sha1calc[48];  // large enough for base64 and Hex representation
     String ret;
-    SHA1Builder sha_builder;
+    HTTPSHA1Builder sha_builder;
     base64 b64;
 
     log_debug("Trying to authenticate user %s using SHA1.", username.c_str());
@@ -296,15 +298,15 @@ void HTTPWebServer::requestAuthentication(HTTPAuthMethod mode, const char *realm
   send(401, String(FPSTR(mimeTable[html].mimeType)), authFailMsg);
 }
 
-RequestHandler &HTTPWebServer::on(const Uri &uri, HTTPWebServer::THandlerFunction handler) {
+RequestHandler &HTTPWebServer::on(const HTTPUri &uri, HTTPWebServer::THandlerFunction handler) {
   return on(uri, HTTP_ANY, handler);
 }
 
-RequestHandler &HTTPWebServer::on(const Uri &uri, HTTPMethod method, HTTPWebServer::THandlerFunction fn) {
+RequestHandler &HTTPWebServer::on(const HTTPUri &uri, HTTPMethod method, HTTPWebServer::THandlerFunction fn) {
   return on(uri, method, fn, _fileUploadHandler);
 }
 
-RequestHandler &HTTPWebServer::on(const Uri &uri, HTTPMethod method, HTTPWebServer::THandlerFunction fn, HTTPWebServer::THandlerFunction ufn) {
+RequestHandler &HTTPWebServer::on(const HTTPUri &uri, HTTPMethod method, HTTPWebServer::THandlerFunction fn, HTTPWebServer::THandlerFunction ufn) {
   FunctionRequestHandler *handler = new FunctionRequestHandler(fn, ufn, uri, method);
   _addRequestHandler(handler);
   return *handler;
@@ -783,7 +785,7 @@ String HTTPWebServer::header(int i) const {
   while (current && i--) {
     current = current->next;
   }
-  return current ? current->value : emptyString;
+  return current ? current->value : HTTP_EMPTY_STRING;
 }
 
 String HTTPWebServer::headerName(int i) const {
@@ -791,7 +793,7 @@ String HTTPWebServer::headerName(int i) const {
   while (current && i--) {
     current = current->next;
   }
-  return current ? current->key : emptyString;
+  return current ? current->key : HTTP_EMPTY_STRING;
 }
 
 int HTTPWebServer::headers() const {
@@ -950,7 +952,7 @@ const String &HTTPWebServer::responseHeader(String name) const {
       return current->value;
     }
   }
-  return emptyString;
+  return HTTP_EMPTY_STRING;
 }
 
 const String &HTTPWebServer::responseHeader(int i) const {
@@ -958,7 +960,7 @@ const String &HTTPWebServer::responseHeader(int i) const {
   while (current && i--) {
     current = current->next;
   }
-  return current ? current->value : emptyString;
+  return current ? current->value : HTTP_EMPTY_STRING;
 }
 
 const String &HTTPWebServer::responseHeaderName(int i) const {
@@ -966,7 +968,7 @@ const String &HTTPWebServer::responseHeaderName(int i) const {
   while (current && i--) {
     current = current->next;
   }
-  return current ? current->key : emptyString;
+  return current ? current->key : HTTP_EMPTY_STRING;
 }
 
 bool HTTPWebServer::hasResponseHeader(const String &name) const {
